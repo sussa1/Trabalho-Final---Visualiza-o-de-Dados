@@ -70,34 +70,43 @@ class Boxplot extends React.Component<IProps, IState> {
                 .range([height, 0])
             svg.append("g").call(d3.axisLeft(y))
 
-
-            // create a tooltip
-            var Tooltip = d3.select(".svg")
-                .append("div")
-                .style("opacity", 0)
-                .attr("class", "tooltip")
-                .style("position", "absolute");
-
-            let mousemove = function (d: any) {
-                console.log(d);
+            let mouseover = function (d: any) {
                 let max = d.target.__data__[1].max.toPrecision(3);
                 let q3 = d.target.__data__[1].q3.toPrecision(3);
                 let median = d.target.__data__[1].median.toPrecision(3);
                 let q1 = d.target.__data__[1].q1.toPrecision(3);
                 let min = d.target.__data__[1].min.toPrecision(3);
-                Tooltip.html("Máximo: " + max + "<br>3º Quartil: " + q3 + "<br>Mediana: " + median + "<br>1º Quartil: " + q1 + "<br>Mínimo: " + min)
-                    .style("left", (d.pageX + 20) + "px")
-                    .style("top", (d.pageY) + "px")
-                    .style("opacity", 1);
+                d3.select(".tooltip-container")
+                    .style("opacity", 1)
+                    .style("z-index", 1000);
+
+                d3.select(".tooltip-container")
+                    .style("transform", "scale(1,1)");
+                d3.select(".tooltip")
+                    .html("Máximo: " + max + "<br>3º Quartil: " + q3 + "<br>Mediana: " + median + "<br>1º Quartil: " + q1 + "<br>Mínimo: " + min);
+
                 d3.selectAll(".myRectangle")
                     .style("opacity", 0.1)
                 d3.selectAll("." + d.target.__data__[0])
                     .style("opacity", 1)
             };
 
+            let mousemove = function (d: any) {
+                d3.select(".tooltip-container")
+                    .style("-webkit-transition-property", "none")
+                    .style("-moz-transition-property", "none")
+                    .style("-o-transition-property", "none")
+                    .style("transition-property", "none")
+                    .style("left", (d.pageX + 20) + "px")
+                    .style("top", (d.pageY + 10) + "px");
+            };
+
             let mouseleave = function (d: any) {
-                console.log(d);
-                Tooltip.style("opacity", 0)
+                d3.selectAll(".tooltip-container")
+                    .style("opacity", 0)
+                    .style("z-index", -1000)
+                    .style("transform", "scale(0.1,0.1)")
+                    .style("transition", "all .2s ease-in-out");
                 d3.selectAll(".myRectangle")
                     .style("opacity", 1)
             };
@@ -115,6 +124,7 @@ class Boxplot extends React.Component<IProps, IState> {
                 .attr("class", function (d) { return "myRectangle " + d[0] })
                 .attr("stroke", "black")
                 .style("width", 40)
+                .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
 
@@ -131,6 +141,7 @@ class Boxplot extends React.Component<IProps, IState> {
                 .attr("class", function (d) { return "myRectangle " + d[0] })
                 .attr("stroke", "black")
                 .style("width", 40)
+                .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
 
@@ -147,6 +158,7 @@ class Boxplot extends React.Component<IProps, IState> {
                 .attr("class", function (d) { return "myRectangle " + d[0] })
                 .attr("stroke", "black")
                 .style("width", 40)
+                .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
 
@@ -163,6 +175,7 @@ class Boxplot extends React.Component<IProps, IState> {
                 .attr("stroke", "black")
                 .attr("class", function (d) { return "myRectangle " + d[0] })
                 .style("width", 40)
+                .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
 
@@ -180,6 +193,7 @@ class Boxplot extends React.Component<IProps, IState> {
                 .attr("stroke", "black")
                 .attr("class", function (d) { return "myRectangle " + d[0] })
                 .style("fill", "#69b3a2")
+                .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
 
@@ -195,6 +209,7 @@ class Boxplot extends React.Component<IProps, IState> {
                 .attr("class", function (d) { return "myRectangle " + d[0] })
                 .attr("stroke", "black")
                 .style("width", 80)
+                .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
         });
@@ -207,8 +222,13 @@ class Boxplot extends React.Component<IProps, IState> {
 
     render() {
         return (
-            <div className="svg" >
-                <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+            <div>
+                <div className="svg" >
+                    <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                </div>
+                <div className="tooltip-container">
+                    <div className="tooltip"></div>
+                </div>
             </div>
         );
     }
