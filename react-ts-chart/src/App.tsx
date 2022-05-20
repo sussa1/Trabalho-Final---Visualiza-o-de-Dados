@@ -1,26 +1,25 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import AreasEmpilhadas from './components/AreasEmpilhadas/AreasEmpilhadas';
+import Boxplot from './components/Boxplot/Boxplot';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+interface IProps {
+
+}
+
+interface IState {
+
+}
+
+class App extends React.Component<IProps, IState> {
+
+  render() {
+    return (
+      <div className="App">
+        <Boxplot width={window.innerWidth * 0.5} height={window.innerHeight * 0.5} data={null}></Boxplot>
+      </div>
+    );
+  }
 }
 
 export default App;
