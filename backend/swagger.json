@@ -21,6 +21,74 @@
           }
         }
       }
+    },
+    "/state/value": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "stateCode",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/state/quantity": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "stateCode",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/state/plantedArea": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "stateCode",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/state/harvestedArea": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "stateCode",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   }
 }
