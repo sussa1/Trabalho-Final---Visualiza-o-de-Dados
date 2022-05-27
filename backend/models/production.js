@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize');
-const database = require('../db');
-const City = require('./city')
+import Sequelize from 'sequelize';
+import database from '../db.js';
+import City from './city.js';
 
 const Production = database.define('production', {
     cityId: {
@@ -28,4 +28,4 @@ const Production = database.define('production', {
     value: Sequelize.DOUBLE
 })
 
-module.exports = Production;
+export default Production;

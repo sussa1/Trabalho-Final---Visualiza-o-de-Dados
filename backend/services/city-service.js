@@ -1,55 +1,51 @@
-const fs = require('fs');
-const csv = require('csv-parser');
+import { parse } from 'csv-parse/sync';
+import fs from 'fs';
 
-const database = require('../db');
-const City = require('../models/city');
+import City from '../models/city.js';
 
-let CityService = class CityService {
+export default class CityService {
 
-    async fillData() {
-        await database.sync();
+    static async fillData() {
         let states = {};
         let cities = {};
         await new Promise((resolve, reject) => {
-            fs.createReadStream('data/cities.csv')
-                .pipe(csv({ skipLines: 2, separator: ';' }))
-                .on('data', function (data) {
-                    try {
-                        let code = data['Cód.'];
-                        let name = data['Unidade da Federação e Município'];
-                        if (code.length === 2) { // State
-                            states[code] = name;
-                        } else { // City
-                            cities[code] = name;
-                        }
+            const records = parse(fs.readFileSync('data/cities.csv', 'utf-8').toString(), { delimiter: ';', columns: true });
+            for (let record of records) {
+                try {
+                    let code = record['Cód.'];
+                    let name = record['Unidade da Federação e Município'];
+                    if (code.length === 2) { // State
+                        states[code] = name;
+                    } else { // City
+                        cities[code] = name;
                     }
-                    catch (err) {
-                        console.log(err);
-                        reject();
-                    }
-                })
-                .on('end', async function () {
-                    for (var cityCode in cities) {
-                        let stateCode = cityCode.substring(0, 2);
-                        let cityName = cities[cityCode];
-                        let stateName = states[stateCode];
+                }
+                catch (err) {
+                    console.log(err);
+                    reject();
+                }
+            }
+            let citiesObjects = []
+            for (var cityCode in cities) {
+                let stateCode = cityCode.substring(0, 2);
+                let cityName = cities[cityCode];
+                let stateName = states[stateCode];
 
-                        try {
-                            City.create({
-                                cityCode: cityCode,
-                                stateCode: stateCode,
-                                cityName: cityName,
-                                stateName: stateName
-                            });
-                        } catch (error) {
-                            console.log(error);
-                            reject();
-                        }
-                    }
-                    resolve();
-                });
+                try {
+                    citiesObjects.push({
+                        cityCode: cityCode,
+                        stateCode: stateCode,
+                        cityName: cityName,
+                        stateName: stateName
+                    });
+                } catch (error) {
+                    console.log(error);
+                    reject();
+                }
+            }
+            City.bulkCreate(citiesObjects, { logging: false }).then(r => {
+                resolve();
+            });
         });
     }
 };
-
-module.exports = CityService;

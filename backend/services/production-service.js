@@ -1,63 +1,59 @@
-const fs = require('fs');
-const csv = require('csv-parser');
+import { parse } from 'csv-parse/sync';
+import fs from 'fs';
 
-const database = require('../db');
-const City = require('../models/city');
-const Production = require('../models/production');
+import City from '../models/city.js';
+import Production from '../models/production.js';
 
-let ProductionService = class ProductionService {
-    async fillData() {
-        await database.sync();
-        await new Promise((resolve, reject) => {
-            for (let i = 1974; i <= 2020; i++) {
-                fs.createReadStream('data/' + i + '.csv')
-                    .pipe(csv({ skipLines: 2, separator: ';' }))
-                    .on('data', async function (data) {
-                        if (!data['Município']) {
-                            return;
+export default class ProductionService {
+    static async fillData(file) {
+        console.log(file);
+        await new Promise(async (resolve, reject) => {
+            const records = parse(fs.readFileSync('data/' + file + '.csv').toString(), { from_line: 3, delimiter: ';', columns: true });
+            let produtos = [];
+            for (let record of records) {
+                if (!record['Município']) {
+                    return;
+                }
+                try {
+                    let keyValue;
+                    for (let prop in record) {
+                        if (prop.startsWith('Valor da produção')) {
+                            keyValue = prop;
                         }
-                        try {
-                            let keyValue;
-                            for (let prop in data) {
-                                if (prop.startsWith('Valor da produção')) {
-                                    keyValue = prop;
-                                }
-                            }
-                            let year = data['Ano'];
-                            let cityName = data['Município'];
-                            let product = data['Produto das lavouras temporárias e permanentes'];
-                            let plantedArea = data['Área plantada ou destinada à colheita'];
-                            let harvestedArea = data['Área colhida (Hectares)'];
-                            let quantity = data['Quantidade produzida (Toneladas)'];
-                            let value = data[keyValue];
-                            let city = await City.findOne({ where: { cityName: cityName } });
-                            try {
-                                Production.create({
-                                    year: year,
-                                    product: product,
-                                    plantedArea: plantedArea,
-                                    harvestedArea: harvestedArea,
-                                    quantity: quantity,
-                                    value: value,
-                                    cityId: city.id
-                                });
-                            } catch (error) {
-                                console.log(error);
-                                reject();
-                            }
-                        }
-                        catch (err) {
-                            console.log(err);
-                            reject();
-                        }
-                    })
-                    .on('end', async function () {
-                        console.log('Finalizado processamento das produções');
-                        resolve();
+                    }
+                    const year = record['Ano'];
+                    const cityName = record['Município'];
+                    const product = record['Produto das lavouras temporárias e permanentes'];
+                    const plantedArea = record['Área plantada ou destinada à colheita'];
+                    const harvestedArea = record['Área colhida (Hectares)'];
+                    const quantity = record['Quantidade produzida (Toneladas)'];
+                    const value = record[keyValue];
+                    const city = await City.findOne({ where: { cityName: cityName }, attributes: ['id'], logging: false });
+
+                    produtos.push({
+                        year: year,
+                        product: product,
+                        plantedArea: plantedArea,
+                        harvestedArea: harvestedArea,
+                        quantity: quantity,
+                        value: value,
+                        cityId: city.id
                     });
+
+                }
+                catch (err) {
+                    console.log(err);
+                    reject();
+                }
             }
+            try {
+                console.log('Creating...');
+                await Production.bulkCreate(produtos, { logging: false });
+            } catch (error) {
+                console.log(error);
+                reject();
+            }
+            resolve();
         });
     }
 };
-
-module.exports = ProductionService;

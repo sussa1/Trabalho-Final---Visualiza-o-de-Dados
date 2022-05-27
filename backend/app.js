@@ -1,7 +1,13 @@
+import database from './db.js';
+import City from './models/city.js';
+import Production from './models/production.js';
+import express from 'express';
+import CityService from './services/city-service.js';
+import ProductionService from './services/production-service.js';
+import swaggerFile from './swagger.json' assert {type: "json"};
+import swaggerUi from 'swagger-ui-express';
+
 (async () => {
-    const database = require('./db');
-    const City = require('./models/city');
-    const Production = require('./models/production');
 
     try {
         const resultado = await database.sync();
@@ -11,21 +17,17 @@
     }
 })();
 
-const express = require('express');
 const app = express();
 const port = 3000;
 
-const CityService = require('./services/city-service')
-const ProductionService = require('./services/production-service')
-
 app.post('/fillDatabase', async (req, res) => {
-    await new CityService().fillData()
-    await new ProductionService().fillData();
+    await CityService.fillData();
+    for (let i = 1974; i <= 2020; i++) {
+        await ProductionService.fillData(i);
+    }
     res.send('Processed!');
 });
 
-const swaggerFile = require('./swagger.json')
-const swaggerUi = require('swagger-ui-express');
 app.use(
     '/api-docs',
     swaggerUi.serve,
