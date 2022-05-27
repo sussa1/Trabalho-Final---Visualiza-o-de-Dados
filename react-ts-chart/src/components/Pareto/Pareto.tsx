@@ -101,11 +101,12 @@ class Pareto extends React.Component<IProps, IState> {
             svg.append("path")
                 .datum(filteredData)
                 .attr("fill", "none")
-                .attr("stroke", "steelblue")
+                .attr("stroke", "royalblue")
                 .attr("stroke-width", 1.5)
                 .attr("d", d3.line()
                     .x(function(d) { return xAxis(d[0].toString())! })
                     .y(function(d) { cumSum += d[1]; return y(cumSum/total) })
+                    .curve(d3.curveMonotoneX)
                 )
 
             cumSum = 0;
@@ -119,8 +120,8 @@ class Pareto extends React.Component<IProps, IState> {
                 .attr("cx", function(d) { return xAxis(d[0].toString())! })
                 .attr("cy", function(d) { cumSum += d[1]; return y(cumSum/total) })
                 .attr("r", 1.5)
-                .attr("fill", "steelblue")            
-                .attr("stroke", "steelblue");
+                .attr("fill", "royalblue")            
+                .attr("stroke", "royalblue");
 
         })
     }
