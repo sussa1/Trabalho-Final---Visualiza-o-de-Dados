@@ -5,7 +5,6 @@ import './Linha.css'
 interface IProps {
     width: number,
     height: number,
-    data: any
 }
 
 interface IState {
@@ -42,7 +41,15 @@ class Linha extends React.Component<IProps, IState> {
                     initialData.push([Number(line.time), Number(line["valueA"])])
                 })
 
+                var initialDataSecond: any = []
+                
+                data.forEach (line => {
+                    initialDataSecond.push([Number(line.time), Number(line["valueB"])])
+                })
+
                 var hoverData = initialData.slice();
+
+                var hoverDataSecond = initialDataSecond.slice()
 
                 // Add X axis --> it is a date format
                 const x = d3.scaleLinear()
@@ -68,6 +75,15 @@ class Linha extends React.Component<IProps, IState> {
                     .text(function (d) { return d; }) // text showed in the menu
                     .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
+                // add the options to the second button
+                d3.select("#selectButtonSecond")
+                    .selectAll('option')
+                    .data(allGroup)
+                    .enter()
+                    .append('option')
+                    .text(function (d) { return d; }) // text showed in the menu
+                    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
                 // A color scale: one color for each group
                 const myColor = d3.scaleOrdinal()
                     .domain(allGroup)
@@ -77,12 +93,24 @@ class Linha extends React.Component<IProps, IState> {
                 var line = svg
                     .append('g')
                     .append("path")
-                    .datum(initialData)
-                    .attr("d", d3.line()
-                        .x(function(d) { return x(+d[0]); })
-                        .y(function(d) { return y(+d[1]); })
-                    )
+                    // .datum(initialData)
+                    // .attr("d", d3.line()
+                    //     .x(function(d) { return x(+d[0]); })
+                    //     .y(function(d) { return y(+d[1]); })
+                    // )
                     .attr("stroke", function(d){ return String(myColor("valueA")) })
+                    .style("stroke-width", 4)
+                    .style("fill", "none")
+
+                var secondLine = svg
+                    .append('g')
+                    .append("path")
+                    // .datum(initialDataSecond)
+                    // .attr("d", d3.line()
+                    //     .x(function(d) { return x(+d[0]); })
+                    //     .y(function(d) { return y(+d[1]); })
+                    // )
+                    .attr("stroke", function(d){ return String(myColor("valueB")) })
                     .style("stroke-width", 4)
                     .style("fill", "none")
 
@@ -98,8 +126,23 @@ class Linha extends React.Component<IProps, IState> {
                     .attr('r', 2)
                     .style("opacity", 0)
 
+                var focusSecond = svg
+                    .append('g')
+                    .append('circle')
+                    .style("fill", "black")
+                    .attr("stroke", "black")
+                    .attr('r', 2)
+                    .style("opacity", 0)
+
                 // Create the text that travels along the curve of chart
                 var focusText = svg
+                    .append('g')
+                    .append('text')
+                    .style("opacity", 0)
+                    .attr("text-anchor", "left")
+                    .attr("alignment-baseline", "middle")
+
+                var focusTextSecond = svg
                     .append('g')
                     .append('text')
                     .style("opacity", 0)
@@ -127,6 +170,27 @@ class Linha extends React.Component<IProps, IState> {
                     hoverData = dataFilter.slice();
                 }
 
+                // A function that update the chart
+                function updateSecond(selectedGroup: any) {
+                    // Create new data with the selection?
+                    const dataFilter: any = []
+                    data.forEach (line => {
+                        dataFilter.push([Number(line.time), Number(line[selectedGroup])])
+                    })
+                    // Give these new data to update line
+                    secondLine
+                        .datum(dataFilter)
+                        .transition()
+                        .duration(500)
+                        .attr("d", d3.line()
+                            .x(function(d) { return x(+d[0]); })
+                            .y(function(d) { return y(+d[1]); })
+                        )
+                        .attr("stroke", function(d){ return String(myColor(selectedGroup)) })
+
+                    hoverDataSecond = dataFilter.slice();
+                }
+
                 // Create a rect on top of the svg area: this rectangle recovers mouse position
                 svg
                     .append('rect')
@@ -143,13 +207,20 @@ class Linha extends React.Component<IProps, IState> {
                 function mouseover() {
                     focus.style("opacity", 1)
                     focusText.style("opacity",1)
+
+                    focusSecond.style("opacity", 1)
+                    focusTextSecond.style("opacity",1)
                 }
 
                 function mousemove(e: any) {
                     // recover coordinate we need
                     var x0 = Math.round(x.invert(e[0]));
                     var i = bisect(hoverData, x0, 1);
-                    var selectedData = hoverData[i]
+                    var selectedData = hoverData[i];
+
+                    var i2 = bisect(hoverDataSecond, x0, 1);
+                    var selectedDataSecond = hoverDataSecond[i2];
+
                     focus
                         .attr("cx", x(selectedData[0]))
                         .attr("cy", y(selectedData[1]))
@@ -157,11 +228,22 @@ class Linha extends React.Component<IProps, IState> {
                         .html("x:" + selectedData[0] + ",  " + "y:" + selectedData[1])
                         .attr("x", x(selectedData[0])+15)
                         .attr("y", y(selectedData[1]))
+
+                    focusSecond
+                        .attr("cx", x(selectedDataSecond[0]))
+                        .attr("cy", y(selectedDataSecond[1]))
+                    focusTextSecond
+                        .html("x:" + selectedDataSecond[0] + ",  " + "y:" + selectedDataSecond[1])
+                        .attr("x", x(selectedDataSecond[0])+15)
+                        .attr("y", y(selectedDataSecond[1]))
                 }
                 
                 function mouseout() {
                     focus.style("opacity", 0)
                     focusText.style("opacity", 0)
+
+                    focusSecond.style("opacity", 0)
+                    focusTextSecond.style("opacity",0)
                 }
 
                 // When the button is changed, run the updateChart function
@@ -170,6 +252,11 @@ class Linha extends React.Component<IProps, IState> {
                     const selectedOption = d3.select(this).property("value")
                     // run the updateChart function with this selected option
                     update(selectedOption)
+                })
+
+                d3.select("#selectButtonSecond").on("change", function(event,d) {
+                    const selectedOption = d3.select(this).property("value")
+                    updateSecond(selectedOption)
                 })
 
             })
@@ -184,6 +271,7 @@ class Linha extends React.Component<IProps, IState> {
         return (
             <div>
                 <select id="selectButton"></select>
+                <select id="selectButtonSecond"></select>
                 <div className="svg" >
                     <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                 </div>
