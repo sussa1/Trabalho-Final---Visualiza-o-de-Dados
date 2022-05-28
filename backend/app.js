@@ -11,8 +11,6 @@ import Cors from 'cors';
 (async () => {
 
     try {
-        Production.belongsTo(City);
-        City.hasMany(Production);
         const resultado = await database.sync();
         console.log(resultado);
     } catch (error) {
@@ -27,9 +25,7 @@ app.use(Cors())
 
 app.post('/fillDatabase', async (req, res) => {
     await CityService.fillData();
-    for (let i = 1974; i <= 2020; i++) {
-        await ProductionService.fillData(i);
-    }
+    await ProductionService.fillData('lavouras');
     res.send('Processed!');
 });
 
@@ -50,6 +46,13 @@ app.get('/state/quantity', async (req, res) => {
 app.get('/state/plantedArea', async (req, res) => {
     const stateCode = req.query.stateCode;
     ProductionService.getStateProductionPlantedArea(stateCode).then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/state/lostArea', async (req, res) => {
+    const stateCode = req.query.stateCode;
+    ProductionService.getStateProductionLostArea(stateCode).then(v => {
         res.send(v);
     });
 });
@@ -81,6 +84,19 @@ app.get('/plantedArea', async (req, res) => {
 
 app.get('/harvestedArea', async (req, res) => {
     ProductionService.getTotalProductionHarvestedAreaByProduct().then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/lostArea', async (req, res) => {
+    ProductionService.getTotalProductionLostAreaByProduct().then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/lostArea/year', async (req, res) => {
+    const year = req.query.year;
+    ProductionService.getTotalProductionLostAreaByProduct(year).then(v => {
         res.send(v);
     });
 });

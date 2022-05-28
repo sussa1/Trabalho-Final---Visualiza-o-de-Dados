@@ -7,10 +7,6 @@ const Production = database.define('production', {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true,
-        references: {
-            model: City,
-            key: 'id'
-        }
     },
     year: {
         type: Sequelize.INTEGER,

@@ -6,3 +6,8 @@
 .basic-multi-select {
     margin: 15px;
 }
+
+.graph {
+    display: flex;
+    flex-direction: row;
+}
