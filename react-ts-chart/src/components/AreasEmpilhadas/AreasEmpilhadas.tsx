@@ -46,9 +46,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         // Processa dos dados
 
         let maiorTotal = 0;
-
         this.state.data.forEach(d => {
-            if (d.product !== "Total" && d.value > maiorTotal) {
+            if (this.state.produtosSelecionados.includes(d.product) && d.value > maiorTotal) {
                 maiorTotal = d.value;
             }
         });
@@ -209,7 +208,10 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         });
     }
 
-    handleInputChange(v: any) {
+    handleInputChange(v: any, action: any) {
+        if (action.action === 'create-option') {
+            return;
+        }
         if (!v) {
             this.setState({ produtosSelecionados: this.state.conjuntoProdutos });
         }
@@ -218,7 +220,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
     render() {
         return (
-            <div>
+            <div className="root">
                 <Select
                     isMulti
                     name="products"
