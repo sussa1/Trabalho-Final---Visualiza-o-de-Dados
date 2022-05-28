@@ -5,7 +5,8 @@ import Select from 'react-select';
 
 interface IProps {
     width: number,
-    height: number
+    height: number,
+    variavel: string
 }
 
 interface IState {
@@ -24,6 +25,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         this.buildGraph = this.buildGraph.bind(this);
         this.getSelectElements = this.getSelectElements.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.tratarMouse = this.tratarMouse.bind(this);
     }
 
     private buildGraph() {
@@ -31,8 +33,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             return;
         }
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 55, bottom: 30, left: 75 };
-        const width: number = this.props.width - margin.left - margin.right;
+        const margin = { top: 20, right: 55, bottom: 30, left: 100 };
+        const width: number = this.props.width - 250 - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
         d3.select(this.ref)
             .html("");
@@ -45,12 +47,22 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         // Processa dos dados
 
-        let maiorTotal = 0;
+        let somaAno: any = {};
         this.state.data.forEach(d => {
-            if (this.state.produtosSelecionados.includes(d.product) && d.value > maiorTotal) {
-                maiorTotal = d.value;
+            if (this.state.produtosSelecionados.includes(d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", ""))) {
+                if (d.year in somaAno) {
+                    somaAno[d.year] += d[this.props.variavel];
+                } else {
+                    somaAno[d.year] = d[this.props.variavel];
+                }
             }
         });
+        let maiorTotal = 0;
+        for (let v of Object.entries(somaAno)) {
+            if (v[1] as number > maiorTotal) {
+                maiorTotal = v[1] as number;
+            }
+        }
 
         // List of groups = header of the csv files
         const keys: any = Array.from(this.state.produtosSelecionados);
@@ -67,7 +79,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .domain([0, maiorTotal])
             .range([height, 0]);
         svg.append("g")
-            .attr("transform", "translate(40, 0)")
+            .attr("transform", "translate(0, 0)")
             .call(d3.axisLeft(y));
 
         // color palette
@@ -78,8 +90,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             };
             this.state.data.forEach(d => {
                 for (let grupo of keys) {
-                    if (d.product === grupo && d.year === i) {
-                        obj[grupo] = d.value as number;
+                    if (d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === grupo && d.year === i) {
+                        obj[grupo] = d[this.props.variavel];
                     }
                 }
 
@@ -92,6 +104,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             obj['year'] = i;
             vals.push(obj);
         }
+        console.log(keys);
 
         //stack the data?
         const stackedData = d3.stack()
@@ -105,6 +118,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .join("path")
             .style("fill", function (d) { return String(color(d.key)) })
             .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
+            .on("mousemove", this.tratarMouse)
             .attr("d", d3.area<{ [key: string]: any; }>()
                 .x(function (d, i) { return x(d.data.year); })
                 .y0(function (d) { return y(d[0]); })
@@ -135,13 +149,21 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         // LEGEND //
         //////////
 
+        d3.selectAll('.legends')
+            .html("");
+
+        const legend = d3.selectAll('.legends')
+            .attr("width", 200)
+            .attr("height", this.state.produtosSelecionados.length * 25.5)
+            .append("g");
+
         // Add one dot in the legend for each name.
         var size = 20
-        svg.selectAll("myrect")
+        legend.selectAll("myrect")
             .data(keys)
             .enter()
             .append("rect")
-            .attr("x", width - 100)
+            .attr("x", 10)
             .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
             .attr("width", size)
             .attr("height", size)
@@ -150,11 +172,11 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .on("mouseleave", noHighlight)
 
         // Add one dot in the legend for each name.
-        svg.selectAll("mylabels")
-            .data(keys)
+        legend.selectAll("mylabels")
+            .data(keys.sort())
             .enter()
             .append("text")
-            .attr("x", width - 70)
+            .attr("x", 40)
             .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
             .style("fill", function (d: any) { return String(color(d)) })
             .text((d: any) => d)
@@ -164,9 +186,13 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .on("mouseleave", noHighlight)
     }
 
+    tratarMouse(e: any) {
+        console.log(e);
+    }
+
     componentDidMount() {
         if (!this.state || !this.state.data) {
-            const apiUrl = 'http://localhost:3000/value';
+            const apiUrl = 'http://localhost:3000/' + this.props.variavel;
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
@@ -181,7 +207,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                             minYear = d.year;
                         }
                         if (d.product !== "Total") {
-                            conjuntoProdutos.add(d.product);
+                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                            conjuntoProdutos.add(nomeCertoProduto);
                         }
                     });
 
@@ -212,10 +239,13 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         if (action.action === 'create-option') {
             return;
         }
-        if (!v) {
+        console.log(v);
+        if (!v || v.length === 0) {
+            console.log('reset');
             this.setState({ produtosSelecionados: this.state.conjuntoProdutos });
+        } else {
+            this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) });
         }
-        this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) });
     }
 
     render() {
@@ -227,12 +257,18 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     options={this.state == null ? [] : this.getSelectElements(this.state.conjuntoProdutos)}
                     className="basic-multi-select"
                     classNamePrefix="select"
+                    placeholder="Escolha o(s) produto(s)"
                     onChange={this.handleInputChange}
                 />
-                <div className="svg" >
-                    <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
+                    <div className="svg" >
+                        <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                    </div>
+                    <div style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+                        <svg className="legends" style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
+                    </div>
                 </div>
-            </div>
+            </div >
         );
     }
 }
