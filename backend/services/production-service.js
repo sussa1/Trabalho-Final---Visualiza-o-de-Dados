@@ -79,7 +79,7 @@ export default class ProductionService {
         for (let city of cities) {
             citiesMap[city.id] = city.cityName;
         }
-        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), value: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'quantity'], logging: false });
+        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), quantity: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'quantity'], logging: false });
         for (let i = 0; i < res.length; i++) {
             res[i].dataValues.city = citiesMap[res[i].dataValues.city];
         }
@@ -92,7 +92,7 @@ export default class ProductionService {
         for (let city of cities) {
             citiesMap[city.id] = city.cityName;
         }
-        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), value: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'plantedArea'], logging: false });
+        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), plantedArea: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'plantedArea'], logging: false });
         for (let i = 0; i < res.length; i++) {
             res[i].dataValues.city = citiesMap[res[i].dataValues.city];
         }
@@ -105,10 +105,50 @@ export default class ProductionService {
         for (let city of cities) {
             citiesMap[city.id] = city.cityName;
         }
-        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), value: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'harvestedArea'], logging: false });
+        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), harvestedArea: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'harvestedArea'], logging: false });
         for (let i = 0; i < res.length; i++) {
             res[i].dataValues.city = citiesMap[res[i].dataValues.city];
         }
+        return res.map(r => r.dataValues);
+    }
+
+    static async getTotalProductionValueByProduct() {
+        const res = await Production.findAll({
+            group: ['year', 'product'],
+            where: { value: { [Sequelize.Op.not]: [NaN, 0] } },
+            attributes: ['year', 'product', [Sequelize.fn('sum', Sequelize.col('value')), 'value']],
+            logging: false
+        });
+        return res.map(r => r.dataValues);
+    }
+
+    static async getTotalProductionQuantityByProduct() {
+        const res = await Production.findAll({
+            group: ['year', 'product'],
+            where: { quantity: { [Sequelize.Op.not]: [NaN, 0] } },
+            attributes: ['year', 'product', [Sequelize.fn('sum', Sequelize.col('quantity')), 'quantity']],
+            logging: false
+        });
+        return res.map(r => r.dataValues);
+    }
+
+    static async getTotalProductionPlantedAreaByProduct() {
+        const res = await Production.findAll({
+            group: ['year', 'product'],
+            where: { plantedArea: { [Sequelize.Op.not]: [NaN, 0] } },
+            attributes: ['year', 'product', [Sequelize.fn('sum', Sequelize.col('plantedArea')), 'plantedArea']],
+            logging: false
+        });
+        return res.map(r => r.dataValues);
+    }
+
+    static async getTotalProductionHarvestedAreaByProduct() {
+        const res = await Production.findAll({
+            group: ['year', 'product'],
+            where: { harvestedArea: { [Sequelize.Op.not]: [NaN, 0] } },
+            attributes: ['year', 'product', [Sequelize.fn('sum', Sequelize.col('harvestedArea')), 'harvestedArea']],
+            logging: false
+        });
         return res.map(r => r.dataValues);
     }
 

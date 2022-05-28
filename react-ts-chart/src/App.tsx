@@ -19,7 +19,7 @@ class App extends React.Component<IProps, IState> {
   render() {
     return (
       <div className="App">
-        <Dispersao width={window.innerWidth * 0.5} height={window.innerHeight * 0.5} data={null}></Dispersao>
+        <AreasEmpilhadas width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} ></AreasEmpilhadas>
       </div>
     );
   }

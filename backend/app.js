@@ -6,6 +6,7 @@ import CityService from './services/city-service.js';
 import ProductionService from './services/production-service.js';
 import swaggerFile from './swagger.json' assert {type: "json"};
 import swaggerUi from 'swagger-ui-express';
+import Cors from 'cors';
 
 (async () => {
 
@@ -21,6 +22,8 @@ import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 const port = 3000;
+
+app.use(Cors())
 
 app.post('/fillDatabase', async (req, res) => {
     await CityService.fillData();
@@ -54,6 +57,30 @@ app.get('/state/plantedArea', async (req, res) => {
 app.get('/state/harvestedArea', async (req, res) => {
     const stateCode = req.query.stateCode;
     ProductionService.getStateProductionHarvestedArea(stateCode).then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/value', async (req, res) => {
+    ProductionService.getTotalProductionValueByProduct().then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/quantity', async (req, res) => {
+    ProductionService.getTotalProductionQuantityByProduct().then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/plantedArea', async (req, res) => {
+    ProductionService.getTotalProductionPlantedAreaByProduct().then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/harvestedArea', async (req, res) => {
+    ProductionService.getTotalProductionHarvestedAreaByProduct().then(v => {
         res.send(v);
     });
 });
