@@ -135,12 +135,12 @@ export default class ProductionService {
     }
 
     static async getStateProductionQuantities(stateCode) {
-        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['id', 'cityName'], logging: false });
+        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['cityCode', 'cityName'], logging: false });
         const citiesMap = {};
         for (let city of cities) {
-            citiesMap[city.id] = city.cityName;
+            citiesMap[city.cityCode] = city.cityName;
         }
-        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), quantity: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'quantity'], logging: false });
+        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap).map(v => parseFloat(v)), quantity: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'quantity'] });
         for (let i = 0; i < res.length; i++) {
             res[i].dataValues.city = citiesMap[res[i].dataValues.city];
             res[i].dataValues.quantity *= ProductionService.getQuantityTreatedFruit(res[i].dataValues.product, res[i].dataValues.year);
@@ -149,10 +149,10 @@ export default class ProductionService {
     }
 
     static async getStateProductionPlantedArea(stateCode) {
-        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['id', 'cityName'], logging: false });
+        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['cityCode', 'cityName'], logging: false });
         const citiesMap = {};
         for (let city of cities) {
-            citiesMap[city.id] = city.cityName;
+            citiesMap[city.cityCode] = city.cityName;
         }
         const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), plantedArea: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'plantedArea'], logging: false });
         for (let i = 0; i < res.length; i++) {
@@ -161,11 +161,24 @@ export default class ProductionService {
         return res.map(r => r.dataValues);
     }
 
-    static async getStateProductionHarvestedArea(stateCode) {
-        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['id', 'cityName'], logging: false });
+    static async getStateProductionLostArea(stateCode) {
+        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['cityCode', 'cityName'], logging: false });
         const citiesMap = {};
         for (let city of cities) {
-            citiesMap[city.id] = city.cityName;
+            citiesMap[city.cityCode] = city.cityName;
+        }
+        const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), plantedArea: { [Sequelize.Op.not]: [NaN, 0] }, harvestedArea: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', [Sequelize.fn('sum', Sequelize.literal('(plantedArea - harvestedArea)/plantedArea')), 'lostArea']], logging: false });
+        for (let i = 0; i < res.length; i++) {
+            res[i].dataValues.city = citiesMap[res[i].dataValues.city];
+        }
+        return res.map(r => r.dataValues);
+    }
+
+    static async getStateProductionHarvestedArea(stateCode) {
+        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['cityCode', 'cityName'], logging: false });
+        const citiesMap = {};
+        for (let city of cities) {
+            citiesMap[city.cityCode] = city.cityName;
         }
         const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), harvestedArea: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'harvestedArea'], logging: false });
         for (let i = 0; i < res.length; i++) {
@@ -207,11 +220,21 @@ export default class ProductionService {
         return res.map(r => r.dataValues);
     }
 
+    static async getTotalProductionLostAreaByYear(year) {
+        const res = await Production.findAll({
+            group: ['cityId'],
+            where: { year: year, harvestedArea: { [Sequelize.Op.not]: [NaN, 0] }, plantedArea: { [Sequelize.Op.not]: [NaN, 0] } },
+            attributes: ['cityId', [Sequelize.fn('sum', Sequelize.literal('(plantedArea - harvestedArea)/plantedArea')), 'lostArea']],
+            logging: false
+        });
+        return res.map(r => r.dataValues);
+    }
+
     static async getTotalProductionLostAreaByProduct() {
         const res = await Production.findAll({
             group: ['year', 'product'],
             where: { harvestedArea: { [Sequelize.Op.not]: [NaN, 0] }, plantedArea: { [Sequelize.Op.not]: [NaN, 0] } },
-            attributes: ['year', 'product', [Sequelize.fn('sum', Sequelize.literal('(plantedArea - harvestedArea)/plantedArea')), 'lostArea']],
+            attributes: ['cityId', 'year', 'product', [Sequelize.fn('sum', Sequelize.literal('(plantedArea - harvestedArea)/plantedArea')), 'lostArea']],
             logging: false
         });
         return res.map(r => r.dataValues);
@@ -226,5 +249,6 @@ export default class ProductionService {
         });
         return res.map(r => r.dataValues);
     }
+
 
 };

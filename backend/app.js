@@ -50,6 +50,13 @@ app.get('/state/plantedArea', async (req, res) => {
     });
 });
 
+app.get('/state/lostArea', async (req, res) => {
+    const stateCode = req.query.stateCode;
+    ProductionService.getStateProductionLostArea(stateCode).then(v => {
+        res.send(v);
+    });
+});
+
 app.get('/state/harvestedArea', async (req, res) => {
     const stateCode = req.query.stateCode;
     ProductionService.getStateProductionHarvestedArea(stateCode).then(v => {
@@ -83,6 +90,13 @@ app.get('/harvestedArea', async (req, res) => {
 
 app.get('/lostArea', async (req, res) => {
     ProductionService.getTotalProductionLostAreaByProduct().then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/lostArea/year', async (req, res) => {
+    const year = req.query.year;
+    ProductionService.getTotalProductionLostAreaByProduct(year).then(v => {
         res.send(v);
     });
 });
