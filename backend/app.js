@@ -96,7 +96,13 @@ app.get('/lostArea', async (req, res) => {
 
 app.get('/lostArea/year', async (req, res) => {
     const year = req.query.year;
-    ProductionService.getTotalProductionLostAreaByProduct(year).then(v => {
+    ProductionService.getTotalProductionLostAreaByYear(year).then(v => {
+        res.send(v);
+    });
+});
+
+app.get('/test', async (req, res) => {
+    ProductionService.test().then(v => {
         res.send(v);
     });
 });

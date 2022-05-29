@@ -25,7 +25,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         this.buildGraph = this.buildGraph.bind(this);
         this.getSelectElements = this.getSelectElements.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.tratarMouse = this.tratarMouse.bind(this);
     }
 
     private buildGraph() {
@@ -104,7 +103,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             obj['year'] = i;
             vals.push(obj);
         }
-        console.log(keys);
 
         //stack the data?
         const stackedData = d3.stack()
@@ -118,7 +116,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .join("path")
             .style("fill", function (d) { return String(color(d.key)) })
             .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
-            .on("mousemove", this.tratarMouse)
             .attr("d", d3.area<{ [key: string]: any; }>()
                 .x(function (d, i) { return x(d.data.year); })
                 .y0(function (d) { return y(d[0]); })
@@ -184,10 +181,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .style("alignment-baseline", "middle")
             .on("mouseover", highlight)
             .on("mouseleave", noHighlight)
-    }
-
-    tratarMouse(e: any) {
-        console.log(e);
     }
 
     componentDidMount() {
