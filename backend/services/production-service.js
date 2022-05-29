@@ -224,9 +224,20 @@ export default class ProductionService {
         const res = await Production.findAll({
             group: ['cityId'],
             where: { year: year, harvestedArea: { [Sequelize.Op.not]: [NaN, 0] }, plantedArea: { [Sequelize.Op.not]: [NaN, 0] } },
-            attributes: ['cityId', [Sequelize.fn('sum', Sequelize.literal('(plantedArea - harvestedArea)/plantedArea')), 'lostArea']],
+            attributes: [
+                'cityId',
+                [Sequelize.fn('sum', Sequelize.literal('plantedArea')), 'totalPlantedArea'],
+                [Sequelize.fn('sum', Sequelize.literal('harvestedArea')), 'totalHarvestedArea']
+            ],
             logging: false
         });
+
+        for (let i = 0; i < res.length; i++) {
+            res[i].dataValues.lostArea = (res[i].dataValues.totalPlantedArea - res[i].dataValues.totalHarvestedArea) / res[i].dataValues.totalPlantedArea;
+            if (res[i].dataValues.lostArea < 0) {
+                res[i].dataValues.lostArea = 0;
+            }
+        }
         return res.map(r => r.dataValues);
     }
 
@@ -248,6 +259,17 @@ export default class ProductionService {
             logging: false
         });
         return res.map(r => r.dataValues);
+    }
+
+    static async test() {
+        const res = await Production.count({
+            where: {
+                harvestedArea: {
+                    [Sequelize.Op.gt]: Sequelize.literal('`production`.`plantedArea`')
+                }
+            }
+        });
+        return { res: res };
     }
 
 
