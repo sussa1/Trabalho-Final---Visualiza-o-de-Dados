@@ -7,7 +7,6 @@ import './Dispersao.css'
 interface IProps {
     width: number,
     height: number,
-    data: any
 }
 
 interface IState {
@@ -20,8 +19,8 @@ class Dispersao extends React.Component<IProps, IState> {
     private buildGraph() {
         // set the dimensions and margins of the graph
         const margin = {top: 40, right: 20, bottom: 70, left: 50};
-        const width: number = this.props.width*1.1 - margin.left - margin.right;
-        const height: number = this.props.height*2 - margin.top - margin.bottom;
+        const width: number = this.props.width - margin.left - margin.right;
+        const height: number = this.props.height - margin.top - margin.bottom;
 
         // append the svg object to the body of the page
         const svg = d3.select(this.ref)
