@@ -50,10 +50,10 @@ export default class ProductionService {
     }
 
     static async getStateProductionValues(stateCode) {
-        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['id', 'cityName'], logging: false });
+        const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['cityCode', 'cityName'], logging: false });
         const citiesMap = {};
         for (let city of cities) {
-            citiesMap[city.id] = city.cityName;
+            citiesMap[city.cityCode] = city.cityName;
         }
         const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), value: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'value'], logging: false });
         for (let i = 0; i < res.length; i++) {
