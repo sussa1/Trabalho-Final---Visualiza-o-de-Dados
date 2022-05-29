@@ -19,7 +19,7 @@ class App extends React.Component<IProps, IState> {
   render() {
     return (
       <div className="App">
-        <Boxplot width={window.innerWidth * 0.8} height={window.innerHeight * 0.9} year={1990}></Boxplot>
+        <AreasEmpilhadas width={window.innerWidth * 0.8} height={window.innerHeight * 0.9} variavel={"harvestedArea"}></AreasEmpilhadas>
       </div>
     );
   }

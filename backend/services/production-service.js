@@ -2,6 +2,7 @@ import { parse } from 'csv-parse/sync';
 import { Sequelize } from "sequelize";
 import fs from 'fs';
 import csv from 'csvtojson';
+import groupBy from 'group-by-with-sum'
 
 import City from '../models/city.js';
 import Production from '../models/production.js';
@@ -58,6 +59,7 @@ export default class ProductionService {
         const res = await Production.findAll({ where: { cityId: Object.keys(citiesMap), value: { [Sequelize.Op.not]: [NaN, 0] } }, attributes: ['year', ['cityId', 'city'], 'product', 'value'], logging: false });
         for (let i = 0; i < res.length; i++) {
             res[i].dataValues.city = citiesMap[res[i].dataValues.city];
+            res[i].dataValues.value /= ProductionService.getInflationCorrection(res[i].dataValues.year);
         }
         return res.map(r => r.dataValues);
     }
@@ -134,6 +136,19 @@ export default class ProductionService {
         return 1;
     }
 
+    static getInflationCorrection(year) {
+        if (year < 1994) {
+            return 1;
+        }
+        let indexes = [8.0994, 7.7955, 1.5003, 28.8934, 12.0637, 11.8837, 35.4136, 6.2735, 14.6838, -0.9627, 4.3052, 9.4313, 9.7963, -4.0858, 13.8336, 4.1154, 9.1372, 5.0643, 2.1663, 10.8674, 7.7334, -2.5174, 9.3169, 9.6047];
+        let i = 2019 - year;
+        let J_i = 1;
+        for (let k = 0; k < i; k++) {
+            J_i = J_i * (1 + (indexes[indexes.length - 1 - k] / 100));
+        }
+        return J_i;
+    }
+
     static async getStateProductionQuantities(stateCode) {
         const cities = await City.findAll({ where: { stateCode: stateCode }, attributes: ['cityCode', 'cityName'], logging: false });
         const citiesMap = {};
@@ -191,10 +206,13 @@ export default class ProductionService {
         const res = await Production.findAll({
             group: ['year', 'product'],
             where: { value: { [Sequelize.Op.not]: [NaN, 0] } },
-            attributes: ['year', 'product', [Sequelize.fn('sum', Sequelize.col('value')), 'value']],
+            attributes: ['year', 'product', 'value'],
             logging: false
         });
-        return res.map(r => r.dataValues);
+
+        let data = res.map(r => r.dataValues);
+        const actualRes = groupBy(data, 'year,product', 'value');
+        return actualRes;
     }
 
     static async getTotalProductionQuantityByProduct() {
@@ -264,9 +282,10 @@ export default class ProductionService {
     static async test() {
         const res = await Production.count({
             where: {
-                harvestedArea: {
-                    [Sequelize.Op.gt]: Sequelize.literal('`production`.`plantedArea`')
-                }
+                year: {
+                    [Sequelize.Op.lt]: 1991
+                },
+                value: [NaN, 0]
             }
         });
         return { res: res };

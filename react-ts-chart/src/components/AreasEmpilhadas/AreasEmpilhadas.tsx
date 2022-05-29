@@ -71,7 +71,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .range([0, width]);
         svg.append("g")
             .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).ticks(20));
+            .call(d3.axisBottom(x).ticks(20).tickFormat(d3.format("d")));
 
         // Add Y axis
         const y = d3.scaleLinear()
@@ -82,7 +82,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .call(d3.axisLeft(y));
 
         // color palette
-        const color = (c: string) => d3.interpolateRdYlBu(keys.indexOf(c) / keys.length);
+        const color = (c: string) => d3.interpolateViridis(keys.indexOf(c) / keys.length);
         let vals: { [key: string]: number; }[] = [];
         for (let i = this.state.minYear; i <= this.state.maxYear; i++) {
             let obj: { [key: string]: number } = {
@@ -151,7 +151,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         const legend = d3.selectAll('.legends')
             .attr("width", 200)
-            .attr("height", this.state.produtosSelecionados.length * 25.5)
+            .attr("height", this.state.produtosSelecionados.length * 25 + 15)
             .append("g");
 
         // Add one dot in the legend for each name.
@@ -170,7 +170,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         // Add one dot in the legend for each name.
         legend.selectAll("mylabels")
-            .data(keys.sort())
+            .data(keys)
             .enter()
             .append("text")
             .attr("x", 40)
@@ -204,8 +204,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                             conjuntoProdutos.add(nomeCertoProduto);
                         }
                     });
-
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data })
+                    console.log(minYear);
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data })
                 });
         }
 
