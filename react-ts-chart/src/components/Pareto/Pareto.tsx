@@ -7,7 +7,6 @@ import './Pareto.css'
 interface IProps {
     width: number,
     height: number,
-    data: any
 }
 
 interface IState {
