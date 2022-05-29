@@ -7,10 +7,15 @@ import './Pareto.css'
 interface IProps {
     width: number,
     height: number,
+    variavel: string
 }
 
 interface IState {
-
+    data: any[],
+    minYear: number,
+    maxYear: number,
+    conjuntoProdutos: string[],
+    produtosSelecionados: string[],
 }
 
 class Pareto extends React.Component<IProps, IState> {
