@@ -5,8 +5,7 @@ import Select from 'react-select';
 
 interface IProps {
     width: number,
-    height: number,
-    variavel: string
+    height: number
 }
 
 interface IState {
@@ -15,6 +14,7 @@ interface IState {
     maxYear: number,
     conjuntoProdutos: string[],
     produtosSelecionados: string[],
+    variable: string
 }
 
 class AreasEmpilhadas extends React.Component<IProps, IState> {
@@ -22,9 +22,20 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
     constructor(props: IProps) {
         super(props);
+        this.state = {
+            data: [],
+            minYear: 0,
+            maxYear: 0,
+            conjuntoProdutos: [],
+            produtosSelecionados: [],
+            variable: 'value'
+        };
         this.buildGraph = this.buildGraph.bind(this);
         this.getSelectElements = this.getSelectElements.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.getVariableSelectElements = this.getVariableSelectElements.bind(this);
+        this.handleVariableInputChange = this.handleVariableInputChange.bind(this);
+        this.getData = this.getData.bind(this);
     }
 
     private buildGraph() {
@@ -50,9 +61,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         this.state.data.forEach(d => {
             if (this.state.produtosSelecionados.includes(d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", ""))) {
                 if (d.year in somaAno) {
-                    somaAno[d.year] += d[this.props.variavel];
+                    somaAno[d.year] += d[this.state.variable];
                 } else {
-                    somaAno[d.year] = d[this.props.variavel];
+                    somaAno[d.year] = d[this.state.variable];
                 }
             }
         });
@@ -90,7 +101,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             this.state.data.forEach(d => {
                 for (let grupo of keys) {
                     if (d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === grupo && d.year === i) {
-                        obj[grupo] = d[this.props.variavel];
+                        obj[grupo] = d[this.state.variable];
                     }
                 }
 
@@ -184,31 +195,32 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
     }
 
     componentDidMount() {
-        if (!this.state || !this.state.data) {
-            const apiUrl = 'http://localhost:3000/' + this.props.variavel;
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                    let minYear = Infinity;
-                    let maxYear = 0;
-                    let conjuntoProdutos = new Set<string>();
-                    data.forEach((d: any) => {
-                        if (d.year > maxYear) {
-                            maxYear = d.year;
-                        }
-                        if (d.year < minYear) {
-                            minYear = d.year;
-                        }
-                        if (d.product !== "Total") {
-                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
-                            conjuntoProdutos.add(nomeCertoProduto);
-                        }
-                    });
-                    console.log(minYear);
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data })
-                });
-        }
+        this.getData();
+    }
 
+    getData() {
+        const apiUrl = 'http://localhost:3000/' + this.state.variable;
+        fetch(apiUrl)
+            .then((response) => response.json())
+            .then((data) => {
+                let minYear = Infinity;
+                let maxYear = 0;
+                let conjuntoProdutos = new Set<string>();
+                data.forEach((d: any) => {
+                    if (d.year > maxYear) {
+                        maxYear = d.year;
+                    }
+                    if (d.year < minYear) {
+                        minYear = d.year;
+                    }
+                    if (d.product !== "Total") {
+                        let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                        conjuntoProdutos.add(nomeCertoProduto);
+                    }
+                });
+                console.log(minYear);
+                this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data }, () => this.buildGraph());
+            });
     }
 
     componentDidUpdate() {
@@ -235,15 +247,47 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         console.log(v);
         if (!v || v.length === 0) {
             console.log('reset');
-            this.setState({ produtosSelecionados: this.state.conjuntoProdutos });
+            this.setState({ produtosSelecionados: this.state.conjuntoProdutos }, () => this.buildGraph());
         } else {
-            this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) });
+            this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) }, () => this.buildGraph());
+        }
+    }
+
+    getVariableSelectElements() {
+        return [
+            { value: 'value', label: 'Valor' },
+            { value: 'quantity', label: 'Quantidade' },
+            { value: 'plantedArea', label: 'Área Plantada' },
+            { value: 'harvestedArea', label: 'Área Colhida' },
+            { value: 'lostArea', label: 'Área Perdida' }
+        ]
+    }
+
+    handleVariableInputChange(v: any, action: any) {
+        if (action.action === 'create-option') {
+            return;
+        }
+        if (!v) {
+            this.setState({ variable: 'value' }, () => this.getData());
+        } else {
+            this.setState({ variable: v.value }, () => this.getData());
         }
     }
 
     render() {
         return (
             <div className="root">
+
+                <Select
+                    name="variable"
+                    options={this.getVariableSelectElements()}
+                    defaultValue={this.getVariableSelectElements()[0]}
+                    className="basic-select"
+                    classNamePrefix="select"
+                    id="variableSelect"
+                    placeholder="Escolha a variável"
+                    onChange={this.handleVariableInputChange}
+                />
                 <Select
                     isMulti
                     name="products"

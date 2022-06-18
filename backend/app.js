@@ -25,7 +25,7 @@ app.use(Cors())
 
 app.post('/fillDatabase', async (req, res) => {
     await CityService.fillData();
-    await ProductionService.fillData('lavouras');
+    await ProductionService.fillData('dados');
     res.send('Processed!');
 });
 
