@@ -36,6 +36,13 @@ app.get('/state/value', async (req, res) => {
     });
 });
 
+app.get('/year/value', async (req, res) => {
+    const year = req.query.year;
+    ProductionService.getYearStateProductionValues(year).then(v => {
+        res.send(v);
+    });
+});
+
 app.get('/state/quantity', async (req, res) => {
     const stateCode = req.query.stateCode;
     ProductionService.getStateProductionQuantities(stateCode).then(v => {
