@@ -46,6 +46,19 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         const margin = { top: 20, right: 55, bottom: 30, left: 100 };
         const width: number = this.props.width - 250 - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
+
+        let getYear = (x: any) => {
+            let inicial = margin.left;
+            let tamanhoPorAno = width / (this.state.maxYear - this.state.minYear);
+            let dif = x - inicial;
+            return Math.round(this.state.minYear + dif / tamanhoPorAno);
+        }
+
+        let getXOfYear = (year: any) => {
+            let tamanhoPorAno = width / (this.state.maxYear - this.state.minYear);
+            return tamanhoPorAno * (year - this.state.minYear) + 0.5;
+        }
+
         d3.select(this.ref)
             .html("");
         // append the svg object to the body of the page
@@ -80,9 +93,10 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         const x = d3.scaleLinear()
             .domain([this.state.minYear, this.state.maxYear])
             .range([0, width]);
+        const xAxis = d3.axisBottom(x).ticks(20).tickFormat(d3.format("d"));
         svg.append("g")
             .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).ticks(20).tickFormat(d3.format("d")));
+            .call(xAxis);
 
         // Add Y axis
         const y = d3.scaleLinear()
@@ -120,6 +134,73 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .keys(keys)
             (vals);
 
+        let mouseover = (d: any, i: any) => {
+            let product = i.key;
+            let currentYear = getYear(d.x);
+            let index = this.state.data.find((d: any) => d.year == currentYear && d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") == product);
+            let value = index[this.state.variable];
+
+            let x = getXOfYear(currentYear);
+
+            d3.select('.hover-line')
+                .style("opacity", 1)
+                .style("z-index", 1000000000)
+                .attr("x1", x)
+                .attr("x2", x);
+
+            d3.select(".tooltip-container")
+                .style("opacity", 1)
+                .style("z-index", 1000);
+
+            d3.select(".tooltip-container")
+                .style("transform", "scale(1,1)");
+            d3.select(".tooltip")
+                .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
+
+            // reduce opacity of all groups
+            d3.selectAll(".myArea").style("opacity", .1)
+            // expect the one that is hovered
+            d3.select("." + i.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '')).style("opacity", 1)
+        };
+
+        let mousemove = (d: any, i: any) => {
+            let product = i.key;
+            let currentYear = getYear(d.x);
+            let index = this.state.data.find((d: any) => d.year == currentYear && d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") == product);
+            let value = index[this.state.variable];
+
+            let x = getXOfYear(currentYear);
+
+            d3.select('.hover-line')
+                .style("opacity", 1)
+                .attr("x1", x)
+                .attr("x2", x);
+
+            d3.select(".tooltip-container")
+                .style("-webkit-transition-property", "none")
+                .style("-moz-transition-property", "none")
+                .style("-o-transition-property", "none")
+                .style("transition-property", "none")
+                .style("left", (d.pageX + 20) + "px")
+                .style("top", (d.pageY - 80) + "px");
+            d3.select(".tooltip")
+                .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
+        };
+
+        let mouseleave = function (d: any) {
+            d3.select('.hover-line')
+                .style("opacity", 0);
+
+            d3.selectAll(".myArea").style("opacity", 1);
+            d3.selectAll(".tooltip-container")
+                .style("opacity", 0)
+                .style("z-index", -1000)
+                .style("transform", "scale(0.1,0.1)")
+                .style("transition", "all .2s ease-in-out");
+            d3.selectAll(".myRectangle")
+                .style("opacity", 1)
+        };
+
         // Show the areas
         svg
             .selectAll("mylayers")
@@ -132,6 +213,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .y0(function (d) { return y(d[0]); })
                 .y1(function (d) { return y(d[1]); })
             )
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave)
 
 
         //////////
@@ -192,6 +276,17 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .style("alignment-baseline", "middle")
             .on("mouseover", highlight)
             .on("mouseleave", noHighlight)
+
+        svg.append("line")
+            .attr("x1", 0)  //<<== change your code here
+            .attr("y1", 0)
+            .attr("x2", 0)  //<<== and here
+            .attr("y2", height)
+            .attr("class", "hover-line")
+            .style("stroke-width", 1)
+            .style("stroke", "black")
+            .style("fill", "none")
+            .style("opacity", 0);
     }
 
     componentDidMount() {
@@ -218,7 +313,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                         conjuntoProdutos.add(nomeCertoProduto);
                     }
                 });
-                console.log(minYear);
                 this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data }, () => this.buildGraph());
             });
     }
@@ -304,6 +398,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     <div style={{ overflowY: 'auto', overflowX: 'hidden' }}>
                         <svg className="legends" style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
                     </div>
+                </div>
+                <div className="tooltip-container">
+                    <div className="tooltip"></div>
                 </div>
             </div >
         );
