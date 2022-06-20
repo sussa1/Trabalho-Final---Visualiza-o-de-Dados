@@ -10,7 +10,8 @@ interface IProps {
 
 interface IState {
     data: any[],
-    year: number
+    year: number,
+    onChangeSelect: any
 }
 
 class BarrasHorizontais extends React.Component<IProps, IState> {
@@ -50,12 +51,11 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
         super(props);
         this.state = {
             data: [],
-            year: 2019
+            year: 2019,
+            onChangeSelect: () => { }
         };
         this.buildGraph = this.buildGraph.bind(this);
         this.getVariableSelectElements = this.getVariableSelectElements.bind(this);
-        this.handleVariableInputChange = this.handleVariableInputChange.bind(this);
-        this.getData = this.getData.bind(this);
     }
 
     private buildGraph() {
@@ -99,15 +99,10 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
             .range([0, width])
             .domain([0, d3.max(this.state.data, d => d.value) + d3.max(this.state.data, d => d.value) * 0.001 as any]);
 
-        svg.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("transform", "rotate(-65)");
+        let xAxis = svg.append("g")
+            .attr("transform", `translate(0, ${height})`);
 
-        svg.append("g")
-            .call(d3.axisLeft(y))
+        let yAxis = svg.append("g");
 
         let mouseover = function (d: any) {
             d3.select(".tooltip-container")
@@ -146,36 +141,65 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
                 .style("opacity", 1)
         };
 
-        //Bars
-        svg.selectAll("myRect")
-            .data(this.state.data)
-            .join("rect")
-            .attr("x", x(d3.max(this.state.data, d => d.value) * 0.001) as any)
-            .attr("y", d => y(this.mapaCodigoEstado[d.state]) as any + 5)
-            .attr("width", d => x(d.value) as any)
-            .attr("class", d => { return "myRect state" + d.state; })
-            .attr("height", y.bandwidth() - 10)
-            .attr("fill", "#69b3a2")
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+        const updateBars = (year: any) => {
+            // Create new data with the selection?
+
+            const apiUrl = 'http://localhost:3000/year/value?year=' + year;
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data) {
+                        x.domain([0, d3.max(data, (d: any) => d.value) as any]);
+                        xAxis.transition().duration(500).call(d3.axisBottom(x) as any).selectAll("text")
+                            .style("text-anchor", "end")
+                            .attr("transform", "rotate(-65)");;
+                        yAxis.call(d3.axisLeft(y));
+                        let barras = svg.selectAll(".myRect")
+                            .data(data, (d: any) => d.state);
+                        barras.exit()
+                            .transition()
+                            .duration(1000)
+                            .attr("width", 0)
+                            .remove();
+                        barras.enter()//this is the enter selection
+                            .append('rect')
+                            .attr("x", 1 as any)
+                            .attr("y", (d: any) => y(this.mapaCodigoEstado[d.state]) as any + 5)
+                            .attr("width", (d: any) => x(d.value) + 1 as any)
+                            .attr("class", (d: any) => { return "myRect state" + d.state; })
+                            .attr("height", y.bandwidth() - 10)
+                            .attr("fill", "#69b3a2")
+                            .on("mouseover", mouseover)
+                            .on("mousemove", mousemove)
+                            .on("mouseleave", mouseleave)
+                            .merge(barras as any)//and from now on, both the enter and the update selections
+                            .transition()
+                            .duration(1000)
+                            .attr("x", 1 as any)
+                            .attr("y", (d: any) => y(this.mapaCodigoEstado[d.state]) as any + 5)
+                            .attr("width", (d: any) => x(d.value) + 1 as any)
+                            .attr("class", (d: any) => { return "myRect state" + d.state; })
+                            .attr("height", y.bandwidth() - 10)
+                            .attr("fill", "#69b3a2");
+
+                    }
+                })
+        };
+        updateBars(this.state.year);
+        this.setState({
+            onChangeSelect: (d: any) => {
+                // recover the option that has been chosen
+                let selectedOption = d.value;
+                if (!selectedOption) {
+                    selectedOption = 2019;
+                }
+                // run the updateChart function with this selected option
+                updateBars(selectedOption)
+            }
+        });
     }
 
     componentDidMount() {
-        this.getData();
-    }
-
-    getData() {
-        const apiUrl = 'http://localhost:3000/year/value?year=' + this.state.year;
-        fetch(apiUrl)
-            .then((response) => response.json())
-            .then((data) => {
-                this.setState({ data: data }, () => this.buildGraph());
-            });
-    }
-
-    componentDidUpdate() {
-        // activate   
         this.buildGraph();
     }
 
@@ -187,17 +211,6 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
             });
         }
         return values;
-    }
-
-    handleVariableInputChange(v: any, action: any) {
-        if (action.action === 'create-option') {
-            return;
-        }
-        if (!v) {
-            this.setState({ year: 2019 }, () => this.getData());
-        } else {
-            this.setState({ year: v.value }, () => this.getData());
-        }
     }
 
     render() {
@@ -212,7 +225,7 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
                     classNamePrefix="select"
                     id="variableSelect"
                     placeholder="Escolha o ano"
-                    onChange={this.handleVariableInputChange}
+                    onChange={this.state.onChangeSelect}
                 />
                 <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
                     <div className="svg" >
