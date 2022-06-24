@@ -14,7 +14,9 @@ interface IState {
     maxYear: number,
     conjuntoProdutos: string[],
     produtosSelecionados: string[],
-    variable: string
+    variable: string,
+    onChangeVariableSelect: any,
+    onChangeProductSelect: any
 }
 
 class AreasEmpilhadas extends React.Component<IProps, IState> {
@@ -28,20 +30,21 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             maxYear: 0,
             conjuntoProdutos: [],
             produtosSelecionados: [],
-            variable: 'value'
+            variable: 'value',
+            onChangeVariableSelect: null,
+            onChangeProductSelect: null
         };
         this.buildGraph = this.buildGraph.bind(this);
         this.getSelectElements = this.getSelectElements.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
         this.getVariableSelectElements = this.getVariableSelectElements.bind(this);
-        this.handleVariableInputChange = this.handleVariableInputChange.bind(this);
-        this.getData = this.getData.bind(this);
     }
 
     private buildGraph() {
-        if (!this.state.data) {
+        if (!this.state.data || this.state.onChangeProductSelect != null || this.state.onChangeVariableSelect != null) {
             return;
         }
+        d3.select(this.ref)
+            .html("");
         // set the dimensions and margins of the graph
         const margin = { top: 20, right: 55, bottom: 30, left: 100 };
         const width: number = this.props.width - 250 - margin.left - margin.right;
@@ -56,11 +59,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         let getXOfYear = (year: any) => {
             let tamanhoPorAno = width / (this.state.maxYear - this.state.minYear);
-            return tamanhoPorAno * (year - this.state.minYear) + 0.5;
+            return tamanhoPorAno * (year - this.state.minYear);
         }
 
-        d3.select(this.ref)
-            .html("");
         // append the svg object to the body of the page
         const svg = d3.select(this.ref)
             .attr("width", width + margin.left + margin.right)
@@ -68,71 +69,18 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-        // Processa dos dados
-
-        let somaAno: any = {};
-        this.state.data.forEach(d => {
-            if (this.state.produtosSelecionados.includes(d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", ""))) {
-                if (d.year in somaAno) {
-                    somaAno[d.year] += d[this.state.variable];
-                } else {
-                    somaAno[d.year] = d[this.state.variable];
-                }
-            }
-        });
-        let maiorTotal = 0;
-        for (let v of Object.entries(somaAno)) {
-            if (v[1] as number > maiorTotal) {
-                maiorTotal = v[1] as number;
-            }
-        }
-
-        // List of groups = header of the csv files
-        const keys: any = Array.from(this.state.produtosSelecionados);
-        // Add X axis
         const x = d3.scaleLinear()
             .domain([this.state.minYear, this.state.maxYear])
             .range([0, width]);
-        const xAxis = d3.axisBottom(x).ticks(20).tickFormat(d3.format("d"));
-        svg.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(xAxis);
 
-        // Add Y axis
+        const xAxis = svg.append("g")
+            .attr("transform", `translate(0, ${height})`);
+
         const y = d3.scaleLinear()
-            .domain([0, maiorTotal])
+            .domain([0, 0])
             .range([height, 0]);
-        svg.append("g")
-            .attr("transform", "translate(0, 0)")
-            .call(d3.axisLeft(y));
-
-        // color palette
-        const color = (c: string) => d3.interpolateViridis(keys.indexOf(c) / keys.length);
-        let vals: { [key: string]: number; }[] = [];
-        for (let i = this.state.minYear; i <= this.state.maxYear; i++) {
-            let obj: { [key: string]: number } = {
-            };
-            this.state.data.forEach(d => {
-                for (let grupo of keys) {
-                    if (d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === grupo && d.year === i) {
-                        obj[grupo] = d[this.state.variable];
-                    }
-                }
-
-                for (let grupo of keys) {
-                    if (!(grupo in obj)) {
-                        obj[grupo] = 0;
-                    }
-                }
-            });
-            obj['year'] = i;
-            vals.push(obj);
-        }
-
-        //stack the data?
-        const stackedData = d3.stack()
-            .keys(keys)
-            (vals);
+        const yAxis = svg.append("g")
+            .attr("transform", "translate(0, 0)");
 
         let mouseover = (d: any, i: any) => {
             let product = i.key;
@@ -173,6 +121,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
             d3.select('.hover-line')
                 .style("opacity", 1)
+                .style("z-index", 100000)
                 .attr("x1", x)
                 .attr("x2", x);
 
@@ -201,27 +150,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .style("opacity", 1)
         };
 
-        // Show the areas
-        svg
-            .selectAll("mylayers")
-            .data(stackedData)
-            .join("path")
-            .style("fill", function (d) { return String(color(d.key)) })
-            .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
-            .attr("d", d3.area<{ [key: string]: any; }>()
-                .x(function (d, i) { return x(d.data.year); })
-                .y0(function (d) { return y(d[0]); })
-                .y1(function (d) { return y(d[1]); })
-            )
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave)
-
-
-        //////////
-        // HIGHLIGHT GROUP //
-        //////////
-
         // What to do when one group is hovered
         var highlight = function (d: any) {
             // reduce opacity of all groups
@@ -235,90 +163,217 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             d3.selectAll(".myArea").style("opacity", 1)
         }
 
-
-
-        //////////
-        // LEGEND //
-        //////////
-
         d3.selectAll('.legends')
             .html("");
 
         const legend = d3.selectAll('.legends')
             .attr("width", 200)
-            .attr("height", this.state.produtosSelecionados.length * 25 + 15)
             .append("g");
 
-        // Add one dot in the legend for each name.
-        var size = 20
-        legend.selectAll("myrect")
-            .data(keys)
-            .enter()
-            .append("rect")
-            .attr("x", 10)
-            .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
-            .attr("width", size)
-            .attr("height", size)
-            .style("fill", function (d: any) { return String(color(d)) })
-            .on("mouseover", highlight)
-            .on("mouseleave", noHighlight)
-
-        // Add one dot in the legend for each name.
-        legend.selectAll("mylabels")
-            .data(keys)
-            .enter()
-            .append("text")
-            .attr("x", 40)
-            .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
-            .style("fill", function (d: any) { return String(color(d)) })
-            .text((d: any) => d)
-            .attr("text-anchor", "left")
-            .style("alignment-baseline", "middle")
-            .on("mouseover", highlight)
-            .on("mouseleave", noHighlight)
-
         svg.append("line")
-            .attr("x1", 0)  //<<== change your code here
+            .attr("x1", 0)
             .attr("y1", 0)
-            .attr("x2", 0)  //<<== and here
+            .attr("x2", 0)
             .attr("y2", height)
             .attr("class", "hover-line")
             .style("stroke-width", 1)
             .style("stroke", "black")
             .style("fill", "none")
             .style("opacity", 0);
+
+        const getDataForUpdateAreas = () => {
+            const apiUrl = 'http://localhost:3000/' + this.state.variable;
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    let minYear = Infinity;
+                    let maxYear = 0;
+                    let conjuntoProdutos = new Set<string>();
+                    data.forEach((d: any) => {
+                        if (d.year > maxYear) {
+                            maxYear = d.year;
+                        }
+                        if (d.year < minYear) {
+                            minYear = d.year;
+                        }
+                        if (d.product !== "Total") {
+                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                            conjuntoProdutos.add(nomeCertoProduto);
+                        }
+                    });
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data }, () => updateAreas());
+                });
+        };
+
+        const updateAreas = () => {
+            let somaAno: any = {};
+            this.state.data.forEach(d => {
+                if (this.state.produtosSelecionados.includes(d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", ""))) {
+                    if (d.year in somaAno) {
+                        somaAno[d.year] += d[this.state.variable];
+                    } else {
+                        somaAno[d.year] = d[this.state.variable];
+                    }
+                }
+            });
+            let maiorTotal = 0;
+            for (let v of Object.entries(somaAno)) {
+                if (v[1] as number > maiorTotal) {
+                    maiorTotal = v[1] as number;
+                }
+            }
+
+            // List of groups = header of the csv files
+            const keys: any = Array.from(this.state.produtosSelecionados);
+            // Add X axis
+            x.domain([this.state.minYear, this.state.maxYear]);
+
+            xAxis.transition().duration(500).call(d3.axisBottom(x).ticks(20).tickFormat(d3.format("d")) as any)
+            // Add Y axis
+            y.domain([0, maiorTotal]);
+            yAxis.transition().duration(500).call(d3.axisLeft(y));
+
+            // color palette
+            const color = (c: string) => d3.interpolateViridis(keys.indexOf(c) / keys.length);
+            let vals: { [key: string]: number; }[] = [];
+            for (let i = this.state.minYear; i <= this.state.maxYear; i++) {
+                let obj: { [key: string]: number } = {
+                };
+                this.state.data.forEach(d => {
+                    for (let grupo of keys) {
+                        if (d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === grupo && d.year === i) {
+                            obj[grupo] = d[this.state.variable];
+                        }
+                    }
+
+                    for (let grupo of keys) {
+                        if (!(grupo in obj)) {
+                            obj[grupo] = 0;
+                        }
+                    }
+                });
+                obj['year'] = i;
+                vals.push(obj);
+            }
+
+            //stack the data?
+            const stackedData = d3.stack()
+                .keys(keys)
+                (vals);
+
+            let areas = svg.selectAll(".myArea")
+                .data(stackedData, (d: any) => d.key);
+            areas.exit().remove();
+            areas.enter()//this is the enter selection
+                .append('path')
+                .style("fill", function (d) { return String(color(d.key)) })
+                .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
+                .attr("d", d3.area<{ [key: string]: any; }>()
+                    .x(function (d, i) { return x(d.data.year); })
+                    .y0(function (d) { return y(d[0]); })
+                    .y1(function (d) { return y(d[1]); })
+                )
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave)
+                .merge(areas as any)//and from now on, both the enter and the update selections
+                .transition()
+                .duration(1000)
+                .attr("d", d3.area<{ [key: string]: any; }>()
+                    .x(function (d, i) { return x(d.data.year); })
+                    .y0(function (d) { return y(d[0]); })
+                    .y1(function (d) { return y(d[1]); })
+                )
+                .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
+                .style("fill", function (d) { return String(color(d.key)) });
+
+            // Add one dot in the legend for each name.
+            var size = 20;
+            d3.selectAll('.legends')
+                .attr("height", this.state.produtosSelecionados.length * 25 + 15);
+
+            let legendRects = legend.selectAll(".myRectLegend")
+                .data(keys, (d: any) => d);
+            let legendTexts = legend.selectAll(".myTextLegend")
+                .data(keys, (d: any) => d);
+            console.log(keys);
+
+            legendRects
+                .enter()
+                .append("rect")
+                .attr("x", 10)
+                .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("width", size)
+                .attr("height", size)
+                .style("fill", function (d: any) { return String(color(d)) })
+                .attr("class", function (d) { return "myRectLegend"; })
+                .on("mouseover", highlight)
+                .on("mouseleave", noHighlight)
+                .merge(legendRects as any)
+                .transition()
+                .duration(500)
+                .attr("x", 10)
+                .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("class", function (d) { return "myRectLegend"; })
+                .attr("width", size)
+                .attr("height", size)
+                .style("fill", function (d: any) { return String(color(d)) });
+
+            // Add one dot in the legend for each name.
+            legendTexts
+                .enter()
+                .append("text")
+                .attr("x", 40)
+                .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("class", function (d) { return "myTextLegend"; })
+                .style("fill", function (d: any) { return String(color(d)) })
+                .text((d: any) => d)
+                .attr("text-anchor", "left")
+                .style("alignment-baseline", "middle")
+                .on("mouseover", highlight)
+                .on("mouseleave", noHighlight)
+                .merge(legendTexts as any)
+                .transition()
+                .duration(500)
+                .attr("x", 40)
+                .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("class", function (d) { return "myTextLegend"; })
+                .style("fill", function (d: any) { return String(color(d)) })
+                .text((d: any) => d)
+                .attr("text-anchor", "left")
+                .style("alignment-baseline", "middle");
+
+            legendRects.exit().remove();
+
+            legendTexts.exit().remove();
+        };
+
+        getDataForUpdateAreas();
+        this.setState({
+            onChangeVariableSelect: (v: any, action: any) => {
+                if (action.action === 'create-option') {
+                    return;
+                }
+                if (!v) {
+                    this.setState({ variable: 'value' }, () => getDataForUpdateAreas());
+                } else {
+                    this.setState({ variable: v.value }, () => getDataForUpdateAreas());
+                }
+            },
+            onChangeProductSelect: (v: any, action: any) => {
+                if (action.action === 'create-option') {
+                    return;
+                }
+                if (!v || v.length === 0) {
+                    this.setState({ produtosSelecionados: this.state.conjuntoProdutos }, () => updateAreas());
+                } else {
+                    this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) }, () => updateAreas());
+                }
+            }
+        });
     }
 
     componentDidMount() {
-        this.getData();
-    }
-
-    getData() {
-        const apiUrl = 'http://localhost:3000/' + this.state.variable;
-        fetch(apiUrl)
-            .then((response) => response.json())
-            .then((data) => {
-                let minYear = Infinity;
-                let maxYear = 0;
-                let conjuntoProdutos = new Set<string>();
-                data.forEach((d: any) => {
-                    if (d.year > maxYear) {
-                        maxYear = d.year;
-                    }
-                    if (d.year < minYear) {
-                        minYear = d.year;
-                    }
-                    if (d.product !== "Total") {
-                        let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
-                        conjuntoProdutos.add(nomeCertoProduto);
-                    }
-                });
-                this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data }, () => this.buildGraph());
-            });
-    }
-
-    componentDidUpdate() {
-        // activate   
         this.buildGraph();
     }
 
@@ -334,19 +389,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         });
     }
 
-    handleInputChange(v: any, action: any) {
-        if (action.action === 'create-option') {
-            return;
-        }
-        console.log(v);
-        if (!v || v.length === 0) {
-            console.log('reset');
-            this.setState({ produtosSelecionados: this.state.conjuntoProdutos }, () => this.buildGraph());
-        } else {
-            this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) }, () => this.buildGraph());
-        }
-    }
-
     getVariableSelectElements() {
         return [
             { value: 'value', label: 'Valor' },
@@ -355,17 +397,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             { value: 'harvestedArea', label: 'Área Colhida' },
             { value: 'lostArea', label: 'Área Perdida' }
         ]
-    }
-
-    handleVariableInputChange(v: any, action: any) {
-        if (action.action === 'create-option') {
-            return;
-        }
-        if (!v) {
-            this.setState({ variable: 'value' }, () => this.getData());
-        } else {
-            this.setState({ variable: v.value }, () => this.getData());
-        }
     }
 
     render() {
@@ -380,7 +411,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     classNamePrefix="select"
                     id="variableSelect"
                     placeholder="Escolha a variável"
-                    onChange={this.handleVariableInputChange}
+                    onChange={this.state.onChangeVariableSelect}
                 />
                 <Select
                     isMulti
@@ -389,7 +420,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     className="basic-multi-select"
                     classNamePrefix="select"
                     placeholder="Escolha o(s) produto(s)"
-                    onChange={this.handleInputChange}
+                    onChange={this.state.onChangeProductSelect}
                 />
                 <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
                     <div className="svg" >

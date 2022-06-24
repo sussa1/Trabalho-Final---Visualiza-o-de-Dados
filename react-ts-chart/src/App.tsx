@@ -21,7 +21,7 @@ class App extends React.Component<IProps, IState> {
   render() {
     return (
       <div className="App">
-        <BarrasHorizontais width={window.innerWidth * 0.8} height={window.innerHeight * 0.9}></BarrasHorizontais>;
+        <AreasEmpilhadas width={window.innerWidth * 0.8} height={window.innerHeight * 0.9}></AreasEmpilhadas>;
       </div>
     );
   }
