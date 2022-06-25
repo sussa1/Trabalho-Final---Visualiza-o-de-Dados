@@ -1,0 +1,4 @@
+.graficos {
+    display: flex;
+    flex-direction: row;
+}

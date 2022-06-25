@@ -5,6 +5,8 @@ import Select from 'react-select';
 
 interface IProps {
     width: number,
+    produtosSelecionados: string[],
+    variable: string,
     height: number
 }
 
@@ -35,8 +37,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             onChangeProductSelect: null
         };
         this.buildGraph = this.buildGraph.bind(this);
-        this.getSelectElements = this.getSelectElements.bind(this);
-        this.getVariableSelectElements = this.getVariableSelectElements.bind(this);
     }
 
     private buildGraph() {
@@ -84,8 +84,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         let mouseover = (d: any, i: any) => {
             let product = i.key;
-            let currentYear = getYear(d.x);
-            let index = this.state.data.find((d: any) => d.year == currentYear && d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") == product);
+            let graphDiv = d.toElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+            let currentYear = getYear(d.x - graphDiv.getBoundingClientRect().x);
+            let index = this.state.data.find((d: any) => d.year === currentYear && d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === product);
             let value = index[this.state.variable];
 
             let x = getXOfYear(currentYear);
@@ -113,8 +114,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         let mousemove = (d: any, i: any) => {
             let product = i.key;
-            let currentYear = getYear(d.x);
-            let index = this.state.data.find((d: any) => d.year == currentYear && d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") == product);
+            let graphDiv = d.toElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+            let currentYear = getYear(d.x - graphDiv.getBoundingClientRect().x);
+            let index = this.state.data.find((d: any) => d.year === currentYear && d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === product);
             let value = index[this.state.variable];
 
             let x = getXOfYear(currentYear);
@@ -182,7 +184,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .style("opacity", 0);
 
         const getDataForUpdateAreas = () => {
-            const apiUrl = 'http://localhost:3000/' + this.state.variable;
+            const apiUrl = 'http://localhost:5000/' + this.state.variable;
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
@@ -357,7 +359,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 if (!v) {
                     this.setState({ variable: 'value' }, () => getDataForUpdateAreas());
                 } else {
-                    this.setState({ variable: v.value }, () => getDataForUpdateAreas());
+                    this.setState({ variable: v }, () => getDataForUpdateAreas());
                 }
             },
             onChangeProductSelect: (v: any, action: any) => {
@@ -367,7 +369,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 if (!v || v.length === 0) {
                     this.setState({ produtosSelecionados: this.state.conjuntoProdutos }, () => updateAreas());
                 } else {
-                    this.setState({ produtosSelecionados: v.map((valor: any) => valor.value) }, () => updateAreas());
+                    this.setState({ produtosSelecionados: v }, () => updateAreas());
                 }
             }
         });
@@ -377,51 +379,18 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         this.buildGraph();
     }
 
-    getSelectElements(data: any) {
-        if (!data) {
-            return [];
+    componentDidUpdate() {
+        if (this.props.produtosSelecionados !== this.state.produtosSelecionados) {
+            this.state.onChangeProductSelect(this.props.produtosSelecionados)
         }
-        return data.map((d: any) => {
-            return {
-                value: d,
-                label: d
-            };
-        });
-    }
-
-    getVariableSelectElements() {
-        return [
-            { value: 'value', label: 'Valor' },
-            { value: 'quantity', label: 'Quantidade' },
-            { value: 'plantedArea', label: 'Área Plantada' },
-            { value: 'harvestedArea', label: 'Área Colhida' },
-            { value: 'lostArea', label: 'Área Perdida' }
-        ]
+        if (this.props.variable !== this.state.variable) {
+            this.state.onChangeVariableSelect(this.props.variable)
+        }
     }
 
     render() {
         return (
             <div className="root">
-
-                <Select
-                    name="variable"
-                    options={this.getVariableSelectElements()}
-                    defaultValue={this.getVariableSelectElements()[0]}
-                    className="basic-select"
-                    classNamePrefix="select"
-                    id="variableSelect"
-                    placeholder="Escolha a variável"
-                    onChange={this.state.onChangeVariableSelect}
-                />
-                <Select
-                    isMulti
-                    name="products"
-                    options={this.state == null ? [] : this.getSelectElements(this.state.conjuntoProdutos)}
-                    className="basic-multi-select"
-                    classNamePrefix="select"
-                    placeholder="Escolha o(s) produto(s)"
-                    onChange={this.state.onChangeProductSelect}
-                />
                 <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
                     <div className="svg" >
                         <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>

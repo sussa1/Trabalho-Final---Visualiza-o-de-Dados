@@ -2,3 +2,6 @@
 
 /backend/data/*
 /backend/database.sqlite
+
+/new-backend/database.db
+/new-backend/data/*
