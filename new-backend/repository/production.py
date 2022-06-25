@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 
+
 def getCodMunicipio(x, municipios):
   return municipios[x['municipio']]
 
@@ -13,7 +14,11 @@ def fill_db():
         municipios[row['Unidade da Federação e Município']] = row['Cód.']
     dados['cod_municipio'] = dados.apply(lambda x: getCodMunicipio(x, municipios), axis = 1)
     dados.to_sql('production', con=con, if_exists='replace')
+    cur = con.cursor()
+    cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio);')
+    con.commit()
     con.close()
+    print('done')
 
 def getStateProductionValues(stateCode):
     pass
