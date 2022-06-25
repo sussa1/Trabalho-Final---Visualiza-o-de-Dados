@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def getCodMunicipio(x, municipios):
-  return municipios[x['municipio']]
+  return str(municipios[x['municipio']])
 
 def fill_db():
     con = sqlite3.connect('database.db')
@@ -13,9 +13,10 @@ def fill_db():
     for index, row in cidades.iterrows():
         municipios[row['Unidade da Federação e Município']] = row['Cód.']
     dados['cod_municipio'] = dados.apply(lambda x: getCodMunicipio(x, municipios), axis = 1)
+    dados['cod_estado'] = dados['cod_municipio'].str[:2]
     dados.to_sql('production', con=con, if_exists='replace')
     cur = con.cursor()
-    cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio);')
+    cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio, cod_estado);')
     con.commit()
     con.close()
     print('done')
@@ -110,7 +111,7 @@ def getTotalProductionValueByProductAndState(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
-    for row in cur.execute('SELECT ano, produto, SUM(valor) as valor FROM production WHERE valor IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+    for row in cur.execute('SELECT ano, produto, SUM(valor) as valor FROM production WHERE valor IS NOT NULL AND cod_estado = \'' + state + '\' GROUP BY ano, produto;'):
         results.append({
             'year': row[0],
             'product': row[1],
@@ -123,7 +124,7 @@ def getTotalProductionQuantityByProductAndState(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
-    for row in cur.execute('SELECT ano, produto, SUM(quantidade) as quantidade FROM production WHERE quantidade IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+    for row in cur.execute('SELECT ano, produto, SUM(quantidade) as quantidade FROM production WHERE quantidade IS NOT NULL AND cod_estado = \'' + state + '\' GROUP BY ano, produto;'):
         results.append({
             'year': row[0],
             'product': row[1],
@@ -136,7 +137,7 @@ def getTotalProductionPlantedAreaByProductAndState(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
-    for row in cur.execute('SELECT ano, produto, SUM(area_plantada) as area_plantada FROM production WHERE area_plantada IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+    for row in cur.execute('SELECT ano, produto, SUM(area_plantada) as area_plantada FROM production WHERE area_plantada IS NOT NULL AND cod_estado = \'' + state + '\' GROUP BY ano, produto;'):
         results.append({
             'year': row[0],
             'product': row[1],
@@ -149,7 +150,7 @@ def getTotalProductionLostAreaByProductAndState(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
-    for row in cur.execute('SELECT ano, produto, SUM(area_plantada) as area_plantada, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND area_plantada IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+    for row in cur.execute('SELECT ano, produto, SUM(area_plantada) as area_plantada, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND area_plantada IS NOT NULL AND cod_estado = \'' + state + '\' GROUP BY ano, produto;'):
         results.append({
             'year': row[0],
             'product': row[1],
@@ -162,7 +163,7 @@ def getTotalProductionHarvestedAreaByProductAndState(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
-    for row in cur.execute('SELECT ano, produto, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+    for row in cur.execute('SELECT ano, produto, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND cod_estado = \'' + state + '\' GROUP BY ano, produto;'):
         results.append({
             'year': row[0],
             'product': row[1],

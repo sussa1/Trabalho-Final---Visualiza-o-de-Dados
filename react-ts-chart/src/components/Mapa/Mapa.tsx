@@ -9,7 +9,7 @@ interface IProps {
 }
 
 interface IState {
-
+    estadoSelecionado: string
 }
 
 class Mapa extends React.Component<IProps, IState> {
@@ -39,7 +39,6 @@ class Mapa extends React.Component<IProps, IState> {
             let mouseOver = (d: any) => {
                 let estado = d.target.__data__.properties.NOME_UF;
                 svg.selectAll("." + estado.replaceAll(' ', ''))
-                    .attr("cursor", "pointer")
                     .attr("fill", "#1dcf58");
 
                 d3.select(".tooltip-container")
@@ -67,13 +66,25 @@ class Mapa extends React.Component<IProps, IState> {
 
             let mouseLeave = (d: any) => {
                 let estado = d.target.__data__.properties.NOME_UF;
-                svg.selectAll("." + estado.replaceAll(' ', ''))
-                    .attr("fill", "#69b3a2");
+                if (estado !== this.state.estadoSelecionado) {
+                    svg.selectAll("." + estado.replaceAll(' ', ''))
+                        .attr("fill", "#69b3a2");
+                }
                 d3.selectAll(".tooltip-container")
                     .style("opacity", 0)
                     .style("z-index", -1000)
                     .style("transform", "scale(0.1,0.1)")
                     .style("transition", "all .2s ease-in-out");
+            };
+
+            let mouseClick = (d: any) => {
+                svg.selectAll(".estado")
+                    .attr("fill", "#69b3a2");
+                let estado = d.target.__data__.properties.NOME_UF;
+                svg.selectAll("." + estado.replaceAll(' ', ''))
+                    .attr("fill", "#1dcf58");
+                this.setState({ estadoSelecionado: estado });
+                this.props.estadoCallBack(d.target.__data__.properties.GEOCODIGO)
             };
             // Draw the map
             svg.append("g")
@@ -81,13 +92,14 @@ class Mapa extends React.Component<IProps, IState> {
                 .data(data.features)
                 .enter().append("path")
                 .attr("fill", "#69b3a2")
+                .attr("cursor", "pointer")
                 .attr("d", d3.geoPath().projection(projection) as any)
                 .style("stroke", "#fff")
                 .attr("class", (d: any) => { return "estado " + d.properties.NOME_UF.replaceAll(' ', ''); })
                 .on("mouseover", mouseOver)
                 .on("mousemove", mouseMove)
                 .on("mouseleave", mouseLeave)
-                .on("click", (d: any) => this.props.estadoCallBack(d.target.__data__.properties.GEOCODIGO));
+                .on("click", mouseClick);
 
         });
     }
