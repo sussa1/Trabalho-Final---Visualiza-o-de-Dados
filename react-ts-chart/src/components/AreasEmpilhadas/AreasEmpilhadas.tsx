@@ -215,8 +215,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         const updateAreas = () => {
             let somaAno: any = {};
+            let conjSelecionados = new Set(this.state.produtosSelecionados);
             this.state.data.forEach(d => {
-                if (this.state.produtosSelecionados.includes(d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", ""))) {
+                if (conjSelecionados.has(d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", ""))) {
                     if (d.year in somaAno) {
                         somaAno[d.year] += d[this.state.variable];
                     } else {
@@ -244,25 +245,23 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             // color palette
             const color = (c: string) => d3.interpolateViridis(keys.indexOf(c) / keys.length);
             let vals: { [key: string]: number; }[] = [];
+            let dadosOrganizados: any = []
             for (let i = this.state.minYear; i <= this.state.maxYear; i++) {
-                let obj: { [key: string]: number } = {
-                };
-                this.state.data.forEach(d => {
-                    for (let grupo of keys) {
-                        if (d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === grupo && d.year === i) {
-                            obj[grupo] = d[this.state.variable];
-                        }
-                    }
-
-                    for (let grupo of keys) {
-                        if (!(grupo in obj)) {
-                            obj[grupo] = 0;
-                        }
-                    }
-                });
-                obj['year'] = i;
+                dadosOrganizados.push({});
+                for (let produto of this.state.produtosSelecionados) {
+                    dadosOrganizados[i - this.state.minYear][produto] = 0;
+                }
+            }
+            this.state.data.forEach(d => {
+                let productName = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                dadosOrganizados[d.year - this.state.minYear][productName] = d[this.state.variable];
+            });
+            for (let i = 0; i <= this.state.maxYear - this.state.minYear; i++) {
+                let obj = dadosOrganizados[i];
+                obj['year'] = i + this.state.minYear;
                 vals.push(obj);
             }
+            console.log(vals);
 
             //stack the data?
             const stackedData = d3.stack()
@@ -388,7 +387,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
     }
 
     componentDidUpdate() {
-        console.log(this.props);
         if (this.props.produtosSelecionados !== this.state.produtosSelecionados) {
             this.state.onChangeProductSelect(this.props.produtosSelecionados)
         }
