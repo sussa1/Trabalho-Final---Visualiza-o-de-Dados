@@ -100,3 +100,68 @@ def getTotalProductionHarvestedAreaByProduct():
         })
     con.close()
     return results
+
+def getTotalProductionValueByProductAndState(state):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, produto, SUM(valor) as valor FROM production WHERE valor IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+        results.append({
+            'year': row[0],
+            'product': row[1],
+            'value': row[2]
+        })
+    con.close()
+    return results
+
+def getTotalProductionQuantityByProductAndState(state):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, produto, SUM(quantidade) as quantidade FROM production WHERE quantidade IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+        results.append({
+            'year': row[0],
+            'product': row[1],
+            'quantity': row[2]
+        })
+    con.close()
+    return results
+
+def getTotalProductionPlantedAreaByProductAndState(state):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, produto, SUM(area_plantada) as area_plantada FROM production WHERE area_plantada IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+        results.append({
+            'year': row[0],
+            'product': row[1],
+            'plantedArea': row[2]
+        })
+    con.close()
+    return results
+
+def getTotalProductionLostAreaByProductAndState(state):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, produto, SUM(area_plantada) as area_plantada, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND area_plantada IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+        results.append({
+            'year': row[0],
+            'product': row[1],
+            'lostArea': row[2]-row[3]
+        })
+    con.close()
+    return results
+
+def getTotalProductionHarvestedAreaByProductAndState(state):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, produto, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND substr(cod_municipio, 1, 2) = \'' + state + '\' GROUP BY ano, produto;'):
+        results.append({
+            'year': row[0],
+            'product': row[1],
+            'harvestedArea': row[2]
+        })
+    con.close()
+    return results

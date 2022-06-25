@@ -5,6 +5,7 @@ import React from 'react';
 interface IProps {
     width: number,
     height: number,
+    estadoCallBack: any
 }
 
 interface IState {
@@ -13,9 +14,11 @@ interface IState {
 
 class Mapa extends React.Component<IProps, IState> {
 
+    ref!: SVGSVGElement;
+
     buildGraph() {
         // The svg
-        var svg = d3.select("svg");
+        var svg = d3.select(this.ref);
 
         // Map and projection
         var projection = d3.geoMercator()
@@ -83,7 +86,8 @@ class Mapa extends React.Component<IProps, IState> {
                 .attr("class", (d: any) => { return "estado " + d.properties.NOME_UF.replaceAll(' ', ''); })
                 .on("mouseover", mouseOver)
                 .on("mousemove", mouseMove)
-                .on("mouseleave", mouseLeave);
+                .on("mouseleave", mouseLeave)
+                .on("click", (d: any) => this.props.estadoCallBack(d.target.__data__.properties.GEOCODIGO));
 
         });
     }
@@ -95,7 +99,7 @@ class Mapa extends React.Component<IProps, IState> {
     render() {
         return (
             <div>
-                <svg id="my_dataviz" width={this.props.width} height={this.props.height}></svg>
+                <svg ref={(ref: SVGSVGElement) => this.ref = ref} width={this.props.width} height={this.props.height}></svg>
                 <div className="tooltip-container">
                     <div className="tooltip"></div>
                 </div>

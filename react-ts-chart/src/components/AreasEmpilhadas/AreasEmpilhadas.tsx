@@ -1,13 +1,13 @@
 import React from 'react';
 import * as d3 from 'd3';
 import './AreasEmpilhadas.css';
-import Select from 'react-select';
 
 interface IProps {
     width: number,
     produtosSelecionados: string[],
     variable: string,
-    height: number
+    height: number,
+    estado: string
 }
 
 interface IState {
@@ -17,8 +17,10 @@ interface IState {
     conjuntoProdutos: string[],
     produtosSelecionados: string[],
     variable: string,
+    estado: string,
     onChangeVariableSelect: any,
-    onChangeProductSelect: any
+    onChangeProductSelect: any,
+    onChangeStateSelect: any
 }
 
 class AreasEmpilhadas extends React.Component<IProps, IState> {
@@ -32,9 +34,11 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             maxYear: 0,
             conjuntoProdutos: [],
             produtosSelecionados: [],
-            variable: 'value',
+            variable: '',
+            estado: '',
             onChangeVariableSelect: null,
-            onChangeProductSelect: null
+            onChangeProductSelect: null,
+            onChangeStateSelect: null
         };
         this.buildGraph = this.buildGraph.bind(this);
     }
@@ -184,27 +188,29 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .style("opacity", 0);
 
         const getDataForUpdateAreas = () => {
-            const apiUrl = 'http://localhost:5000/' + this.state.variable;
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                    let minYear = Infinity;
-                    let maxYear = 0;
-                    let conjuntoProdutos = new Set<string>();
-                    data.forEach((d: any) => {
-                        if (d.year > maxYear) {
-                            maxYear = d.year;
-                        }
-                        if (d.year < minYear) {
-                            minYear = d.year;
-                        }
-                        if (d.product !== "Total") {
-                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
-                            conjuntoProdutos.add(nomeCertoProduto);
-                        }
+            if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && this.state.estado) {
+                const apiUrl = 'http://localhost:5000/state/' + this.state.variable + "?state=" + this.state.estado;
+                fetch(apiUrl)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        let minYear = Infinity;
+                        let maxYear = 0;
+                        let conjuntoProdutos = new Set<string>();
+                        data.forEach((d: any) => {
+                            if (d.year > maxYear) {
+                                maxYear = d.year;
+                            }
+                            if (d.year < minYear) {
+                                minYear = d.year;
+                            }
+                            if (d.product !== "Total") {
+                                let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                                conjuntoProdutos.add(nomeCertoProduto);
+                            }
+                        });
+                        this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data }, () => updateAreas());
                     });
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos).sort(), produtosSelecionados: Array.from(conjuntoProdutos).sort(), data: data }, () => updateAreas());
-                });
+            }
         };
 
         const updateAreas = () => {
@@ -298,7 +304,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .data(keys, (d: any) => d);
             let legendTexts = legend.selectAll(".myTextLegend")
                 .data(keys, (d: any) => d);
-            console.log(keys);
 
             legendRects
                 .enter()
@@ -350,26 +355,29 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             legendTexts.exit().remove();
         };
 
-        getDataForUpdateAreas();
+        if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && this.state.estado) {
+            getDataForUpdateAreas();
+        }
         this.setState({
-            onChangeVariableSelect: (v: any, action: any) => {
-                if (action.action === 'create-option') {
-                    return;
-                }
+            onChangeVariableSelect: (v: any) => {
                 if (!v) {
                     this.setState({ variable: 'value' }, () => getDataForUpdateAreas());
                 } else {
                     this.setState({ variable: v }, () => getDataForUpdateAreas());
                 }
             },
-            onChangeProductSelect: (v: any, action: any) => {
-                if (action.action === 'create-option') {
-                    return;
-                }
+            onChangeProductSelect: (v: any) => {
                 if (!v || v.length === 0) {
                     this.setState({ produtosSelecionados: this.state.conjuntoProdutos }, () => updateAreas());
                 } else {
                     this.setState({ produtosSelecionados: v }, () => updateAreas());
+                }
+            },
+            onChangeStateSelect: (state: any) => {
+                if (!state) {
+                    this.setState({ estado: '' }, () => getDataForUpdateAreas());
+                } else {
+                    this.setState({ estado: state }, () => getDataForUpdateAreas());
                 }
             }
         });
@@ -380,11 +388,15 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
     }
 
     componentDidUpdate() {
+        console.log(this.props);
         if (this.props.produtosSelecionados !== this.state.produtosSelecionados) {
             this.state.onChangeProductSelect(this.props.produtosSelecionados)
         }
         if (this.props.variable !== this.state.variable) {
             this.state.onChangeVariableSelect(this.props.variable)
+        }
+        if (this.props.estado !== this.state.estado) {
+            this.state.onChangeStateSelect(this.props.estado)
         }
     }
 

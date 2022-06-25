@@ -19,6 +19,9 @@ def getStateProductionLostArea(stateCode):
 def getStateProductionHarvestedArea(stateCode):
     pass
 
+def getTotalProductionLostAreaByYear(year):
+    pass
+
 def getTotalProductionValueByProduct():
     return production.getTotalProductionValueByProduct()
 
@@ -28,11 +31,23 @@ def getTotalProductionQuantityByProduct():
 def getTotalProductionPlantedAreaByProduct():
     return production.getTotalProductionPlantedAreaByProduct()
 
-def getTotalProductionLostAreaByYear(year):
-    pass
-
 def getTotalProductionLostAreaByProduct():
     return production.getTotalProductionLostAreaByProduct()
 
 def getTotalProductionHarvestedAreaByProduct():
     return production.getTotalProductionHarvestedAreaByProduct()
+
+def getTotalProductionValueByProductAndState(state):
+    return production.getTotalProductionValueByProductAndState(state)
+
+def getTotalProductionQuantityByProductAndState(state):
+    return production.getTotalProductionQuantityByProductAndState(state)
+
+def getTotalProductionPlantedAreaByProductAndState(state):
+    return production.getTotalProductionPlantedAreaByProductAndState(state)
+
+def getTotalProductionLostAreaByProductAndState(state):
+    return production.getTotalProductionLostAreaByProductAndState(state)
+
+def getTotalProductionHarvestedAreaByProductAndState(state):
+    return production.getTotalProductionHarvestedAreaByProductAndState(state)
