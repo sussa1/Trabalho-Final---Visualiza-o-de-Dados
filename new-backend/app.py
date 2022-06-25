@@ -5,8 +5,6 @@ from flask_cors import CORS
 
 from repository import production as production_repo
 
-production_repo.fill_db()
-
 app = Flask(__name__)
 CORS(app)
 

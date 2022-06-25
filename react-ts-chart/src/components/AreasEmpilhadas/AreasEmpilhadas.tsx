@@ -7,7 +7,8 @@ interface IProps {
     produtosSelecionados: string[],
     variable: string,
     height: number,
-    estado: string
+    estado: string,
+    id: string
 }
 
 interface IState {
@@ -95,7 +96,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
             let x = getXOfYear(currentYear);
 
-            d3.select('.hover-line')
+            d3.select('.hover-line' + this.props.id)
                 .style("opacity", 1)
                 .style("z-index", 1000000000)
                 .attr("x1", x)
@@ -111,9 +112,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
 
             // reduce opacity of all groups
-            d3.selectAll(".myArea").style("opacity", .1)
+            d3.selectAll(".myArea" + this.props.id).style("opacity", .1)
             // expect the one that is hovered
-            d3.select("." + i.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '')).style("opacity", 1)
+            d3.select("." + i.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') + this.props.id).style("opacity", 1)
         };
 
         let mousemove = (d: any, i: any) => {
@@ -125,7 +126,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
             let x = getXOfYear(currentYear);
 
-            d3.select('.hover-line')
+            d3.select('.hover-line' + this.props.id)
                 .style("opacity", 1)
                 .style("z-index", 100000)
                 .attr("x1", x)
@@ -142,37 +143,37 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
         };
 
-        let mouseleave = function (d: any) {
-            d3.select('.hover-line')
+        let mouseleave = (d: any) => {
+            d3.select('.hover-line' + this.props.id)
                 .style("opacity", 0);
 
-            d3.selectAll(".myArea").style("opacity", 1);
+            d3.selectAll(".myArea" + this.props.id).style("opacity", 1);
             d3.selectAll(".tooltip-container")
                 .style("opacity", 0)
                 .style("z-index", -1000)
                 .style("transform", "scale(0.1,0.1)")
                 .style("transition", "all .2s ease-in-out");
-            d3.selectAll(".myRectangle")
+            d3.selectAll(".myRectangle" + this.props.id)
                 .style("opacity", 1)
         };
 
         // What to do when one group is hovered
-        var highlight = function (d: any) {
+        var highlight = (d: any) => {
             // reduce opacity of all groups
-            d3.selectAll(".myArea").style("opacity", .1)
+            d3.selectAll(".myArea" + this.props.id).style("opacity", .1)
             // expect the one that is hovered
-            d3.select("." + d.target.__data__.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '')).style("opacity", 1)
+            d3.select("." + d.target.__data__.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') + this.props.id).style("opacity", 1)
         }
 
         // And when it is not hovered anymore
-        var noHighlight = function (d: any) {
-            d3.selectAll(".myArea").style("opacity", 1)
+        var noHighlight = (d: any) => {
+            d3.selectAll(".myArea" + this.props.id).style("opacity", 1)
         }
 
-        d3.selectAll('.legends')
+        d3.selectAll('.legends' + this.props.id)
             .html("");
 
-        const legend = d3.selectAll('.legends')
+        const legend = d3.selectAll('.legends' + this.props.id)
             .attr("width", 200)
             .append("g");
 
@@ -181,7 +182,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .attr("y1", 0)
             .attr("x2", 0)
             .attr("y2", height)
-            .attr("class", "hover-line")
+            .attr("class", "hover-line" + this.props.id)
             .style("stroke-width", 1)
             .style("stroke", "black")
             .style("fill", "none")
@@ -268,13 +269,13 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .keys(keys)
                 (vals);
 
-            let areas = svg.selectAll(".myArea")
+            let areas = svg.selectAll(".myArea" + this.props.id)
                 .data(stackedData, (d: any) => d.key);
             areas.exit().remove();
             areas.enter()//this is the enter selection
                 .append('path')
                 .style("fill", function (d) { return String(color(d.key)) })
-                .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
+                .attr("class", (d: any) => { return "myArea" + this.props.id + " " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') + this.props.id })
                 .attr("d", d3.area<{ [key: string]: any; }>()
                     .x(function (d, i) { return x(d.data.year); })
                     .y0(function (d) { return y(d[0]); })
@@ -291,17 +292,17 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     .y0(function (d) { return y(d[0]); })
                     .y1(function (d) { return y(d[1]); })
                 )
-                .attr("class", function (d) { return "myArea " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
+                .attr("class", (d: any) => { return "myArea" + this.props.id + " " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') + this.props.id })
                 .style("fill", function (d) { return String(color(d.key)) });
 
             // Add one dot in the legend for each name.
             var size = 20;
-            d3.selectAll('.legends')
+            d3.selectAll('.legends' + this.props.id)
                 .attr("height", this.state.produtosSelecionados.length * 25 + 15);
 
-            let legendRects = legend.selectAll(".myRectLegend")
+            let legendRects = legend.selectAll(".myRectLegend" + this.props.id)
                 .data(keys, (d: any) => d);
-            let legendTexts = legend.selectAll(".myTextLegend")
+            let legendTexts = legend.selectAll(".myTextLegend" + this.props.id)
                 .data(keys, (d: any) => d);
 
             legendRects
@@ -312,7 +313,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function (d: any) { return String(color(d)) })
-                .attr("class", function (d) { return "myRectLegend"; })
+                .attr("class", (d: any) => { return "myRectLegend" + this.props.id; })
                 .on("mouseover", highlight)
                 .on("mouseleave", noHighlight)
                 .merge(legendRects as any)
@@ -320,7 +321,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .duration(500)
                 .attr("x", 10)
                 .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
-                .attr("class", function (d) { return "myRectLegend"; })
+                .attr("class", (d: any) => { return "myRectLegend" + this.props.id; })
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function (d: any) { return String(color(d)) });
@@ -331,7 +332,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .append("text")
                 .attr("x", 40)
                 .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
-                .attr("class", function (d) { return "myTextLegend"; })
+                .attr("class", (d: any) => { return "myTextLegend" + this.props.id; })
                 .style("fill", function (d: any) { return String(color(d)) })
                 .text((d: any) => d)
                 .attr("text-anchor", "left")
@@ -343,7 +344,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .duration(500)
                 .attr("x", 40)
                 .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
-                .attr("class", function (d) { return "myTextLegend"; })
+                .attr("class", (d: any) => { return "myTextLegend" + this.props.id; })
                 .style("fill", function (d: any) { return String(color(d)) })
                 .text((d: any) => d)
                 .attr("text-anchor", "left")
@@ -406,10 +407,10 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                         <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                     </div>
                     <div style={{ overflowY: 'auto', overflowX: 'hidden' }}>
-                        <svg className="legends" style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
+                        <svg className={"legends" + this.props.id} style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
                     </div>
                 </div>
-                <div className="tooltip-container">
+                <div className={"tooltip-container"}>
                     <div className="tooltip"></div>
                 </div>
             </div >

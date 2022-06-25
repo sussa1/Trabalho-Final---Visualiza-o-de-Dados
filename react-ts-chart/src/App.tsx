@@ -16,7 +16,6 @@ interface IProps {
 
 interface IState {
   produtosSelecionados: string[],
-  variable: string,
   estado: string
 }
 
@@ -27,26 +26,11 @@ class App extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      variable: 'value',
       estado: '',
       produtosSelecionados: this.produtos
     };
-    this.onChangeVariableSelect = this.onChangeVariableSelect.bind(this);
     this.onChangeProductSelect = this.onChangeProductSelect.bind(this);
     this.getSelectElements = this.getSelectElements.bind(this);
-    this.getVariableSelectElements = this.getVariableSelectElements.bind(this);
-  }
-
-
-  onChangeVariableSelect(v: any, action: any) {
-    if (action.action === 'create-option') {
-      return;
-    }
-    if (!v) {
-      this.setState({ variable: 'value' });
-    } else {
-      this.setState({ variable: v.value });
-    }
   }
 
   onChangeProductSelect(v: any, action: any) {
@@ -69,35 +53,40 @@ class App extends React.Component<IProps, IState> {
     });
   }
 
-  getVariableSelectElements() {
-    return [
-      { value: 'value', label: 'Valor' },
-      { value: 'quantity', label: 'Quantidade' },
-      { value: 'plantedArea', label: 'Área Plantada' },
-      { value: 'harvestedArea', label: 'Área Colhida' },
-      { value: 'lostArea', label: 'Área Perdida' }
-    ]
+  escolherEstado(estado: any) {
+    this.setState({ estado: estado }, () => this.doScrolling(window.innerHeight * 0.9, 500));
   }
 
-  escolherEstado(estado: any) {
-    this.setState({ estado: estado });
+
+  doScrolling(elementY: any, duration: any) {
+    const startingY = window.pageYOffset
+    const diff = elementY - startingY
+    let start: any = undefined;
+
+    // Bootstrap our animation - it will get called right before next frame shall be rendered.
+    window.requestAnimationFrame(function step(timestamp) {
+      if (!start) start = timestamp
+      // Elapsed milliseconds since start of scrolling.
+      const time = timestamp - start
+      // Get percent of completion in range [0, 1].
+      const percent = Math.min(time / duration, 1)
+
+      window.scrollTo(0, startingY + diff * percent)
+
+      // Proceed with animation as long as we wanted it to.
+      if (time < duration) {
+        window.requestAnimationFrame(step)
+      }
+    })
   }
 
   render() {
     return (
       <div className="App">
+        <div>
+          <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(state: any) => this.escolherEstado(state)}></Mapa>
+        </div>
         <div className="selects">
-
-          <Select
-            name="variable"
-            options={this.getVariableSelectElements()}
-            defaultValue={this.getVariableSelectElements()[0]}
-            className="basic-select"
-            classNamePrefix="select"
-            id="variableSelect"
-            placeholder="Escolha a variável"
-            onChange={this.onChangeVariableSelect}
-          />
           <Select
             isMulti
             name="products"
@@ -109,8 +98,12 @@ class App extends React.Component<IProps, IState> {
           />
         </div>
         <div className="graficos">
-          <Mapa width={window.innerWidth * 0.3} height={window.innerHeight * 0.85} estadoCallBack={(state: any) => this.escolherEstado(state)}></Mapa>
-          <AreasEmpilhadas width={window.innerWidth * 0.7} height={window.innerHeight * 0.85} variable={this.state.variable} produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
+          <AreasEmpilhadas id="1" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='value' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
+          <AreasEmpilhadas id="2" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='quantity' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
+          <AreasEmpilhadas id="3" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='plantedArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
+          <AreasEmpilhadas id="4" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='lostArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
+          <Pareto width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variavel='value'></Pareto>
+          <Pareto width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variavel='quantity'></Pareto>
         </div>
       </div >
     );

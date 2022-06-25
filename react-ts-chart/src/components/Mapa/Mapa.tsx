@@ -52,7 +52,6 @@ class Mapa extends React.Component<IProps, IState> {
             };
 
             let mouseMove = (d: any) => {
-
                 d3.select(".tooltip-container")
                     .style("-webkit-transition-property", "none")
                     .style("-moz-transition-property", "none")
@@ -66,7 +65,7 @@ class Mapa extends React.Component<IProps, IState> {
 
             let mouseLeave = (d: any) => {
                 let estado = d.target.__data__.properties.NOME_UF;
-                if (estado !== this.state.estadoSelecionado) {
+                if (!this.state || estado !== this.state.estadoSelecionado) {
                     svg.selectAll("." + estado.replaceAll(' ', ''))
                         .attr("fill", "#69b3a2");
                 }
