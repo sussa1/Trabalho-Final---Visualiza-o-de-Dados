@@ -9,7 +9,7 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19);
 }
 
-.tooltip-container {
+.tooltip-mapa-container {
     opacity: 0;
     display: flex;
     flex-direction: row;
@@ -17,8 +17,8 @@
     transition: all .2s .1s ease-in-out;
 }
 
-.tooltip {
-
+.tooltip-mapa {
+    width: fit-content;
     border-radius: 0.7em 0.7em 0.7em 0.7em;
     z-index: 1000;
     padding: 8px;

@@ -5,8 +5,8 @@ import './Histograma.css';
 interface IProps {
     width: number,
     height: number,
-    ano: number,
-    values: number[]
+    values: number[],
+    id: any
 }
 
 interface IState {
@@ -22,8 +22,8 @@ class Histograma extends React.Component<IProps, IState> {
 
     private buildGraph() {
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 55, bottom: 30, left: 100 };
-        const width: number = this.props.width - 250 - margin.left - margin.right;
+        const margin = { top: 20, right: 50, bottom: 30, left: 20 };
+        const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 
         d3.select(this.ref)
@@ -34,7 +34,7 @@ class Histograma extends React.Component<IProps, IState> {
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
+        console.log(this.props.values)
         // Processa dos dados
         // X axis: scale and draw:
         var x = d3.scaleLinear()
@@ -42,7 +42,7 @@ class Histograma extends React.Component<IProps, IState> {
             .range([0, width]);
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+            .call(d3.axisBottom(x).ticks(this.props.width / 50));
 
         // set the parameters for the histogram
         const histogram = d3
@@ -61,18 +61,18 @@ class Histograma extends React.Component<IProps, IState> {
         svg.append("g")
             .call(d3.axisLeft(y));
 
-        let mouseover = function (d: any) {
-            d3.select(".tooltip-container")
+        let mouseover = (d: any) => {
+            d3.select(".tooltip-histograma-container")
                 .style("opacity", 1)
                 .style("z-index", 1000);
 
             const sorted_data = d.target.__data__.map((d: any) => d as Number).sort((a: any, b: any) => a - b);
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-histograma-container")
                 .style("transform", "scale(1,1)");
-            d3.select(".tooltip")
+            d3.select(".tooltip-histograma")
                 .html("Intervalo: " + sorted_data[0] + " a " + sorted_data[sorted_data.length - 1] + "<br>Tamanho do Bin: " + d.target.__data__.length);
 
-            d3.selectAll(".myRectangle")
+            d3.selectAll(".myRectangle" + this.props.id)
                 .style("opacity", 0.1)
 
             d3.selectAll(".x0_" + d.target.__data__.x0 + "_x1_" + d.target.__data__.x1)
@@ -80,7 +80,7 @@ class Histograma extends React.Component<IProps, IState> {
         };
 
         let mousemove = function (d: any) {
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-histograma-container")
                 .style("-webkit-transition-property", "none")
                 .style("-moz-transition-property", "none")
                 .style("-o-transition-property", "none")
@@ -89,13 +89,13 @@ class Histograma extends React.Component<IProps, IState> {
                 .style("top", (d.pageY - 50) + "px");
         };
 
-        let mouseleave = function (d: any) {
-            d3.selectAll(".tooltip-container")
+        let mouseleave = (d: any) => {
+            d3.selectAll(".tooltip-histograma-container")
                 .style("opacity", 0)
                 .style("z-index", -1000)
                 .style("transform", "scale(0.1,0.1)")
                 .style("transition", "all .2s ease-in-out");
-            d3.selectAll(".myRectangle")
+            d3.selectAll(".myRectangle" + this.props.id)
                 .style("opacity", 1)
         };
 
@@ -108,17 +108,19 @@ class Histograma extends React.Component<IProps, IState> {
             .attr("transform", function (d) { return "translate(" + x(d.x0 as any) + "," + y(d.length) + ")"; })
             .attr("width", function (d) { return x(d.x1 as any) - x(d.x0 as any) - 1; })
             .attr("height", function (d) { return height - y(d.length); })
-            .attr("class", function (d) { return "myRectangle x0_" + d.x0 + "_x1_" + d.x1 })
+            .attr("class", (d: any) => { return "myRectangle" + this.props.id + " x0_" + d.x0 + "_x1_" + d.x1 })
             .style("fill", "#69b3a2")
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
             .on("mouseleave", mouseleave);
     }
 
-    componentWillReceiveProps() {
-        if (this.props.values && this.props.values.length) {
-            this.buildGraph();
-        }
+    componentDidMount() {
+        this.buildGraph();
+    }
+
+    componentDidUpdate() {
+        this.buildGraph();
     }
 
     render() {
@@ -129,8 +131,8 @@ class Histograma extends React.Component<IProps, IState> {
                         <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                     </div>
                 </div>
-                <div className="tooltip-container">
-                    <div className="tooltip"></div>
+                <div className="tooltip-histograma-container">
+                    <div className="tooltip-histograma"></div>
                 </div>
             </div >
         );

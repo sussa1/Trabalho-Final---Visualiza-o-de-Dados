@@ -26,6 +26,7 @@ interface IState {
     onChangeStateSelect: any,
     boxplotData: any,
     boxplotProduct: any,
+    histogramShowing: any,
     rebuild: any
 }
 
@@ -47,6 +48,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             onChangeStateSelect: null,
             boxplotData: [],
             boxplotProduct: '',
+            histogramShowing: false,
             rebuild: true
         };
         this.buildGraph = this.buildGraph.bind(this);
@@ -112,13 +114,13 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .attr("x1", x)
                 .attr("x2", x);
 
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-area-empilhada-container")
                 .style("opacity", 1)
                 .style("z-index", 1000);
 
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-area-empilhada-container")
                 .style("transform", "scale(1,1)");
-            d3.select(".tooltip")
+            d3.select(".tooltip-area-empilhada")
                 .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
 
             // reduce opacity of all groups
@@ -142,14 +144,14 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .attr("x1", x)
                 .attr("x2", x);
 
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-area-empilhada-container")
                 .style("-webkit-transition-property", "none")
                 .style("-moz-transition-property", "none")
                 .style("-o-transition-property", "none")
                 .style("transition-property", "none")
                 .style("left", (d.pageX + 20) + "px")
                 .style("top", (d.pageY - 80) + "px");
-            d3.select(".tooltip")
+            d3.select(".tooltip-area-empilhada")
                 .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
         };
 
@@ -158,7 +160,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .style("opacity", 0);
 
             d3.selectAll(".myArea" + this.props.id).style("opacity", 1);
-            d3.selectAll(".tooltip-container")
+            d3.selectAll(".tooltip-area-empilhada-container")
                 .style("opacity", 0)
                 .style("z-index", -1000)
                 .style("transform", "scale(0.1,0.1)")
@@ -459,10 +461,11 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         if (this.state.boxplotProduct && this.state.boxplotData) {
             return (
                 <div>
-                    <div className="buttonDiv">
-                        <Button onClick={this.closeBoxplot} variant="secondary">Voltar</Button>
-                    </div>
-                    <Boxplot width={this.props.width * 0.98} height={this.props.height - 48} data={this.state.boxplotData} domain={this.getYearDomainForBoxplot()} id={this.props.id} variable={this.props.variable} grouperKey="year"></Boxplot>
+                    {!this.state.histogramShowing &&
+                        <div className="buttonDiv">
+                            <Button onClick={this.closeBoxplot} variant="secondary">Voltar</Button>
+                        </div>}
+                    <Boxplot width={this.props.width * 0.98} height={this.props.height - 48} onChangeHistogram={(v: any) => this.setState({ histogramShowing: v })} data={this.state.boxplotData} domain={this.getYearDomainForBoxplot()} id={this.props.id} variable={this.props.variable} grouperKey="year"></Boxplot>
                 </div>
             );
         } else {
@@ -476,8 +479,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                             <svg className={"legends" + this.props.id} style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
                         </div>
                     </div>
-                    <div className={"tooltip-container"}>
-                        <div className="tooltip"></div>
+                    <div className={"tooltip-area-empilhada-container"}>
+                        <div className="tooltip-area-empilhada"></div>
                     </div>
                 </div >
             );

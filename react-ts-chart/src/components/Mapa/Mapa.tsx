@@ -41,25 +41,25 @@ class Mapa extends React.Component<IProps, IState> {
                 svg.selectAll("." + estado.replaceAll(' ', ''))
                     .attr("fill", "#1dcf58");
 
-                d3.select(".tooltip-container")
+                d3.select(".tooltip-mapa-container")
                     .style("opacity", 1)
                     .style("z-index", 1000);
 
-                d3.select(".tooltip-container")
+                d3.select(".tooltip-mapa-container")
                     .style("transform", "scale(1,1)");
-                d3.select(".tooltip")
+                d3.select(".tooltip-mapa")
                     .html(d.target.__data__.properties.NOME_UF);
             };
 
             let mouseMove = (d: any) => {
-                d3.select(".tooltip-container")
+                d3.select(".tooltip-mapa-container")
                     .style("-webkit-transition-property", "none")
                     .style("-moz-transition-property", "none")
                     .style("-o-transition-property", "none")
                     .style("transition-property", "none")
                     .style("left", (d.pageX + 10) + "px")
                     .style("top", (d.pageY - 30) + "px");
-                d3.select(".tooltip")
+                d3.select(".tooltip-mapa")
                     .html(d.target.__data__.properties.NOME_UF);
             };
 
@@ -69,7 +69,7 @@ class Mapa extends React.Component<IProps, IState> {
                     svg.selectAll("." + estado.replaceAll(' ', ''))
                         .attr("fill", "#69b3a2");
                 }
-                d3.selectAll(".tooltip-container")
+                d3.selectAll(".tooltip-mapa-container")
                     .style("opacity", 0)
                     .style("z-index", -1000)
                     .style("transform", "scale(0.1,0.1)")
@@ -111,8 +111,8 @@ class Mapa extends React.Component<IProps, IState> {
         return (
             <div>
                 <svg ref={(ref: SVGSVGElement) => this.ref = ref} width={this.props.width} height={this.props.height}></svg>
-                <div className="tooltip-container">
-                    <div className="tooltip"></div>
+                <div className="tooltip-mapa-container">
+                    <div className="tooltip-mapa"></div>
                 </div>
             </div>);
     }

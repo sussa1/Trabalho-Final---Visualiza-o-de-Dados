@@ -1,6 +1,8 @@
 import React from 'react';
 import * as d3 from 'd3';
 import './Boxplot.css'
+import Histograma from '../Histograma/Histograma';
+import Button from 'react-bootstrap/Button';
 
 interface IProps {
     width: number,
@@ -9,10 +11,12 @@ interface IProps {
     grouperKey: any,
     domain: any,
     variable: any,
-    id: any
+    id: any,
+    onChangeHistogram: any
 }
 
 interface IState {
+    valoresHistograma: any
 }
 
 class Boxplot extends React.Component<IProps, IState> {
@@ -20,7 +24,11 @@ class Boxplot extends React.Component<IProps, IState> {
 
     constructor(props: IProps) {
         super(props);
+        this.state = {
+            valoresHistograma: []
+        }
         this.buildGraph = this.buildGraph.bind(this);
+        this.closeHistograma = this.closeHistograma.bind(this);
     }
 
     private buildGraph() {
@@ -110,13 +118,13 @@ class Boxplot extends React.Component<IProps, IState> {
             let median = d.target.__data__[1].median.toPrecision(3);
             let q1 = d.target.__data__[1].q1.toPrecision(3);
             let min = d.target.__data__[1].min.toPrecision(3);
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-boxplot-container")
                 .style("opacity", 1)
                 .style("z-index", 1000);
 
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-boxplot-container")
                 .style("transform", "scale(1,1)");
-            d3.select(".tooltip")
+            d3.select(".tooltip-boxplot")
                 .html("Máximo: " + max + "<br>3º Quartil: " + q3 + "<br>Mediana: " + median + "<br>1º Quartil: " + q1 + "<br>Mínimo: " + min);
 
             d3.selectAll(".myRectangle" + this.props.id)
@@ -126,7 +134,7 @@ class Boxplot extends React.Component<IProps, IState> {
         };
 
         let mousemove = function (d: any) {
-            d3.select(".tooltip-container")
+            d3.select(".tooltip-boxplot-container")
                 .style("-webkit-transition-property", "none")
                 .style("-moz-transition-property", "none")
                 .style("-o-transition-property", "none")
@@ -136,13 +144,19 @@ class Boxplot extends React.Component<IProps, IState> {
         };
 
         let mouseleave = (d: any) => {
-            d3.selectAll(".tooltip-container")
+            d3.selectAll(".tooltip-boxplot-container")
                 .style("opacity", 0)
                 .style("z-index", -1000)
                 .style("transform", "scale(0.1,0.1)")
                 .style("transition", "all .2s ease-in-out");
             d3.selectAll(".myRectangle" + this.props.id)
                 .style("opacity", 1)
+        };
+
+        let mouseclick = (d: any) => {
+            let values = groupRes.get(d.target.__data__[0])?.map(v => v.value);
+            this.props.onChangeHistogram(true);
+            this.setState({ valoresHistograma: values });
         };
 
         // Show the top vertical line
@@ -160,7 +174,8 @@ class Boxplot extends React.Component<IProps, IState> {
             .style("width", tamanhoElementosBoxplot)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+            .on("mouseleave", mouseleave)
+            .on("click", mouseclick);
 
         // Show the bottom vertical line
         svg
@@ -177,7 +192,8 @@ class Boxplot extends React.Component<IProps, IState> {
             .style("width", tamanhoElementosBoxplot)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+            .on("mouseleave", mouseleave)
+            .on("click", mouseclick);
 
         // Show the top horizontal line
         svg
@@ -194,7 +210,8 @@ class Boxplot extends React.Component<IProps, IState> {
             .style("width", tamanhoElementosBoxplot)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+            .on("mouseleave", mouseleave)
+            .on("click", mouseclick);
 
         // Show the bottom horizontal line
         svg
@@ -211,7 +228,8 @@ class Boxplot extends React.Component<IProps, IState> {
             .style("width", tamanhoElementosBoxplot)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+            .on("mouseleave", mouseleave)
+            .on("click", mouseclick);
 
         // rectangle for the main box
         var boxWidth = tamanhoElementosBoxplot;
@@ -229,7 +247,8 @@ class Boxplot extends React.Component<IProps, IState> {
             .style("fill", "#69b3a2")
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+            .on("mouseleave", mouseleave)
+            .on("click", mouseclick);
 
         svg
             .selectAll("medianLines")
@@ -245,24 +264,45 @@ class Boxplot extends React.Component<IProps, IState> {
             .style("width", tamanhoElementosBoxplot)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+            .on("mouseleave", mouseleave)
+            .on("click", mouseclick);
     }
 
     componentDidMount() {
         this.buildGraph();
     }
 
+    componentDidUpdate() {
+        this.buildGraph();
+    }
+
+    closeHistograma() {
+        this.props.onChangeHistogram(false);
+        this.setState({ valoresHistograma: [] })
+    }
+
     render() {
-        return (
-            <div>
-                <div className="svg" >
-                    <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+        if (this.state.valoresHistograma.length) {
+            return (
+                <div>
+                    <div className="buttonDiv">
+                        <Button onClick={this.closeHistograma} variant="secondary">Voltar</Button>
+                    </div>
+                    <Histograma id={this.props.id} width={this.props.width} height={this.props.height} values={this.state.valoresHistograma}></Histograma>
                 </div>
-                <div className="tooltip-container">
-                    <div className="tooltip"></div>
+            );
+        } else {
+            return (
+                <div>
+                    <div className="svg" >
+                        <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                    </div>
+                    <div className="tooltip-boxplot-container">
+                        <div className="tooltip-boxplot"></div>
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
     }
 }
 
