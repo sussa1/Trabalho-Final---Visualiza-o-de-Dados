@@ -11,7 +11,8 @@ interface IProps {
 
 interface IState {
     produtosSelecionados: string[],
-    estado: string
+    estado: string,
+    nomeEstado: string
 }
 
 class Aba2 extends React.Component<IProps, IState> {
@@ -22,6 +23,7 @@ class Aba2 extends React.Component<IProps, IState> {
         super(props);
         this.state = {
             estado: '',
+            nomeEstado: '',
             produtosSelecionados: this.produtos
         };
         this.onChangeProductSelect = this.onChangeProductSelect.bind(this);
@@ -48,8 +50,8 @@ class Aba2 extends React.Component<IProps, IState> {
         });
     }
 
-    escolherEstado(estado: any) {
-        this.setState({ estado: estado }, () => this.doScrolling(window.innerHeight * 0.9, 500));
+    escolherEstado(nomeEstado: any, codEstado: any) {
+        this.setState({ estado: codEstado, nomeEstado: nomeEstado }, () => this.doScrolling(window.innerHeight * 0.9, 500));
     }
 
 
@@ -81,7 +83,7 @@ class Aba2 extends React.Component<IProps, IState> {
             return (
                 <div className="App">
                     <div>
-                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(state: any) => this.escolherEstado(state)}></Mapa>
+                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(name: any, state: any) => this.escolherEstado(name, state)}></Mapa>
                     </div>
                     <div className="selects">
                         <Select
@@ -96,23 +98,23 @@ class Aba2 extends React.Component<IProps, IState> {
                     </div>
                     <div className="graficos">
                         <div>
-                            <h3 className="titulo-grafico">Valor</h3>
+                            <h3 className="titulo-grafico">Valor - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="1" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='value' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
                         </div>
                         <div>
-                            <h3 className="titulo-grafico">Quantidade</h3>
+                            <h3 className="titulo-grafico">Quantidade - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="2" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='quantity' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
                         </div>
                         <div>
-                            <h3 className="titulo-grafico">Área Plantada</h3>
+                            <h3 className="titulo-grafico">Área Plantada - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="3" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='plantedArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
                         </div>
                         <div>
-                            <h3 className="titulo-grafico">Área Perdida</h3>
+                            <h3 className="titulo-grafico">Área Perdida - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="4" width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variable='lostArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado}></AreasEmpilhadas>
                         </div>
-                        <Pareto width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variavel='value'></Pareto>
-                        <Pareto width={window.innerWidth * 0.49} height={window.innerHeight * 0.85} variavel='quantity'></Pareto>
+                        <Pareto width={window.innerWidth * 0.98} height={window.innerHeight * 0.85} variavel='value'></Pareto>
+                        <Pareto width={window.innerWidth * 0.98} height={window.innerHeight * 0.85} variavel='quantity'></Pareto>
                     </div>
                 </div >
             );
@@ -120,7 +122,7 @@ class Aba2 extends React.Component<IProps, IState> {
             return (
                 <div className="Aba2">
                     <div>
-                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(state: any) => this.escolherEstado(state)}></Mapa>
+                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(name: any, state: any) => this.escolherEstado(name, state)}></Mapa>
                     </div>
                 </div>
             );

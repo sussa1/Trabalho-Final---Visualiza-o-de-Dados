@@ -83,7 +83,7 @@ class Mapa extends React.Component<IProps, IState> {
                 svg.selectAll("." + estado.replaceAll(' ', ''))
                     .attr("fill", "#1dcf58");
                 this.setState({ estadoSelecionado: estado });
-                this.props.estadoCallBack(d.target.__data__.properties.GEOCODIGO)
+                this.props.estadoCallBack(estado, d.target.__data__.properties.GEOCODIGO)
             };
             // Draw the map
             svg.append("g")

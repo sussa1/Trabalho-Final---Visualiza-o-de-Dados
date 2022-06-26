@@ -51,10 +51,10 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         d3.select(this.ref)
             .html("");
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 55, bottom: 30, left: 100 };
-        const width: number = this.props.width - 250 - margin.left - margin.right;
+        const margin = { top: 20, right: 10, bottom: 30, left: 70 };
+        const legendWidth: number = this.props.width * 0.20;
+        const width: number = this.props.width - legendWidth - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
-
         let getYear = (x: any) => {
             let inicial = margin.left;
             let tamanhoPorAno = width / (this.state.maxYear - this.state.minYear);
@@ -174,7 +174,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .html("");
 
         const legend = d3.selectAll('.legends' + this.props.id)
-            .attr("width", 200)
+            .attr("width", legendWidth)
             .append("g");
 
         svg.append("line")
@@ -238,7 +238,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             // Add X axis
             x.domain([this.state.minYear, this.state.maxYear]);
 
-            xAxis.transition().duration(500).call(d3.axisBottom(x).ticks(20).tickFormat(d3.format("d")) as any)
+            xAxis.transition().duration(500).call(d3.axisBottom(x).ticks(this.props.width / 50).tickFormat(d3.format("d")) as any)
             // Add Y axis
             y.domain([0, maiorTotal]);
             yAxis.transition().duration(500).call(d3.axisLeft(y));
@@ -296,9 +296,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .style("fill", function (d) { return String(color(d.key)) });
 
             // Add one dot in the legend for each name.
-            var size = 20;
+            var size = legendWidth * 0.1;
             d3.selectAll('.legends' + this.props.id)
-                .attr("height", this.state.produtosSelecionados.length * 25 + 15);
+                .attr("height", 10 + (this.state.produtosSelecionados.length) * (size + 5));
 
             let legendRects = legend.selectAll(".myRectLegend" + this.props.id)
                 .data(keys, (d: any) => d);
@@ -330,22 +330,24 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             legendTexts
                 .enter()
                 .append("text")
-                .attr("x", 40)
+                .attr("x", size + 15)
                 .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("class", (d: any) => { return "myTextLegend" + this.props.id; })
                 .style("fill", function (d: any) { return String(color(d)) })
                 .text((d: any) => d)
                 .attr("text-anchor", "left")
+                .style("font-size", legendWidth * 0.1)
                 .style("alignment-baseline", "middle")
                 .on("mouseover", highlight)
                 .on("mouseleave", noHighlight)
                 .merge(legendTexts as any)
                 .transition()
                 .duration(500)
-                .attr("x", 40)
+                .attr("x", size + 15)
                 .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("class", (d: any) => { return "myTextLegend" + this.props.id; })
                 .style("fill", function (d: any) { return String(color(d)) })
+                .style("font-size", legendWidth * 0.1)
                 .text((d: any) => d)
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle");
