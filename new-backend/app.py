@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 from repository import production as production_repo
 
-production_repo.fill_db()
+#production_repo.fill_db()
 
 app = Flask(__name__)
 CORS(app)
@@ -84,6 +84,31 @@ def getCitiesProductionLostAreaState():
     state = request.args.get('state')
     product = request.args.get('product')
     return jsonify(production.getCitiesProductionLostAreasByProductAndState(state, product))
+
+@app.route('/states/value', methods=['GET'])
+def getStatesProductionValueState():
+    product = request.args.get('product')
+    return jsonify(production.getStatesProductionValuesByProduct(product))
+
+@app.route('/states/quantity', methods=['GET'])
+def getStatesProductionQuantityState():
+    product = request.args.get('product')
+    return jsonify(production.getStatesProductionQuantitiesByProduct(product))
+
+@app.route('/states/plantedArea', methods=['GET'])
+def getStatesProductionPlantedAreaState():
+    product = request.args.get('product')
+    return jsonify(production.getStatesProductionPlantedAreasByProduct(product))
+
+@app.route('/states/harvestedArea', methods=['GET'])
+def getStatesProductionHarvestedAreaState():
+    product = request.args.get('product')
+    return jsonify(production.getStatesProductionHarvestedAreasByProduct(product))
+
+@app.route('/states/lostArea', methods=['GET'])
+def getStatesProductionLostAreaState():
+    product = request.args.get('product')
+    return jsonify(production.getStatesProductionLostAreasByProduct(product))
 
 if __name__ == "__main__":
     from waitress import serve

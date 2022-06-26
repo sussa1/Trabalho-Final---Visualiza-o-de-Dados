@@ -154,7 +154,7 @@ class Boxplot extends React.Component<IProps, IState> {
         };
 
         let mouseclick = (d: any) => {
-            let values = groupRes.get(d.target.__data__[0])?.map(v => v.value);
+            let values = groupRes.get(d.target.__data__[0])?.map(v => v[this.props.variable]);
             this.props.onChangeHistogram(true);
             this.setState({ valoresHistograma: values });
         };

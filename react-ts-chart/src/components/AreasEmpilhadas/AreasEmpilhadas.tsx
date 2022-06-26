@@ -10,7 +10,8 @@ interface IProps {
     variable: string,
     height: number,
     estado: string,
-    id: string
+    id: string,
+    pais: boolean
 }
 
 interface IState {
@@ -172,7 +173,10 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         let mouseclick = (d: any, i: any) => {
             mouseleave(d);
             let product = i.key;
-            const apiUrl = 'http://localhost:5000/cities/' + this.state.variable + "?state=" + this.state.estado + "&product=" + product;
+            let apiUrl = 'http://localhost:5000/cities/' + this.state.variable + "?state=" + this.state.estado + "&product=" + product;
+            if (this.props.pais) {
+                apiUrl = 'http://localhost:5000/states/' + this.state.variable + "?product=" + product;
+            }
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
@@ -212,14 +216,18 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             .style("opacity", 0);
 
         const getDataForUpdateAreas = () => {
-            if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && this.state.estado) {
-                const apiUrl = 'http://localhost:5000/state/' + this.state.variable + "?state=" + this.state.estado;
+            if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && (this.state.estado || this.props.pais)) {
+                let apiUrl = 'http://localhost:5000/state/' + this.state.variable + "?state=" + this.state.estado;
+                if (this.props.pais) {
+                    apiUrl = 'http://localhost:5000/' + this.state.variable;
+                }
                 fetch(apiUrl)
                     .then((response) => response.json())
                     .then((data) => {
                         let minYear = Infinity;
                         let maxYear = 0;
                         let conjuntoProdutos = new Set<string>();
+                        console.log(data);
                         data.forEach((d: any) => {
                             if (d.year > maxYear) {
                                 maxYear = d.year;
@@ -319,9 +327,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .style("fill", function (d) { return String(color(d.key)) });
 
             // Add one dot in the legend for each name.
-            var size = legendWidth * 0.1;
+            var size = legendWidth * 0.09;
             d3.selectAll('.legends' + this.props.id)
-                .attr("height", 10 + (this.state.produtosSelecionados.length) * (size + 5));
+                .attr("height", 5 + (this.state.produtosSelecionados.length) * (size + 5));
 
             let legendRects = legend.selectAll(".myRectLegend" + this.props.id)
                 .data(keys, (d: any) => d);
@@ -331,8 +339,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             legendRects
                 .enter()
                 .append("rect")
-                .attr("x", 10)
-                .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", 5)
+                .attr("y", function (d, i) { return 5 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function (d: any) { return String(color(d)) })
@@ -342,8 +350,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .merge(legendRects as any)
                 .transition()
                 .duration(500)
-                .attr("x", 10)
-                .attr("y", function (d, i) { return 10 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", 5)
+                .attr("y", function (d, i) { return 5 + i * (size + 5) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("class", (d: any) => { return "myRectLegend" + this.props.id; })
                 .attr("width", size)
                 .attr("height", size)
@@ -353,24 +361,24 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             legendTexts
                 .enter()
                 .append("text")
-                .attr("x", size + 15)
-                .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", size + 10)
+                .attr("y", function (d, i) { return 5 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("class", (d: any) => { return "myTextLegend" + this.props.id; })
                 .style("fill", function (d: any) { return String(color(d)) })
                 .text((d: any) => d)
                 .attr("text-anchor", "left")
-                .style("font-size", legendWidth * 0.1)
+                .style("font-size", legendWidth * 0.09)
                 .style("alignment-baseline", "middle")
                 .on("mouseover", highlight)
                 .on("mouseleave", noHighlight)
                 .merge(legendTexts as any)
                 .transition()
                 .duration(500)
-                .attr("x", size + 15)
-                .attr("y", function (d, i) { return 10 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", size + 10)
+                .attr("y", function (d, i) { return 5 + i * (size + 5) + (size / 2) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("class", (d: any) => { return "myTextLegend" + this.props.id; })
                 .style("fill", function (d: any) { return String(color(d)) })
-                .style("font-size", legendWidth * 0.1)
+                .style("font-size", legendWidth * 0.09)
                 .text((d: any) => d)
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle");
@@ -380,7 +388,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             legendTexts.exit().remove();
         };
 
-        if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && this.state.estado) {
+        if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && (this.state.estado || this.props.pais)) {
             getDataForUpdateAreas();
         }
         this.setState({

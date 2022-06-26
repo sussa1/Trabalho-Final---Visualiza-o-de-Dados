@@ -22,7 +22,7 @@ class Histograma extends React.Component<IProps, IState> {
 
     private buildGraph() {
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 50, bottom: 30, left: 20 };
+        const margin = { top: 20, right: 80, bottom: 30, left: 30 };
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 
@@ -38,18 +38,18 @@ class Histograma extends React.Component<IProps, IState> {
         // Processa dos dados
         // X axis: scale and draw:
         var x = d3.scaleLinear()
-            .domain([0, d3.max(this.props.values, d => d) as Number])
+            .domain([0, 1.01 * d3.max(this.props.values, d => d as any) as any])
             .range([0, width]);
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x).ticks(this.props.width / 50));
+            .call(d3.axisBottom(x).ticks(this.props.width / 100));
 
         // set the parameters for the histogram
         const histogram = d3
             .bin()
             .value((d) => d)
             .domain(x.domain() as any)
-            .thresholds(x.ticks(40))
+            .thresholds(x.ticks(40));
 
         // And apply this function to data to get the bins
         var bins = histogram(this.props.values as any);
