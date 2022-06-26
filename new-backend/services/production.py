@@ -51,3 +51,18 @@ def getTotalProductionLostAreaByProductAndState(state):
 
 def getTotalProductionHarvestedAreaByProductAndState(state):
     return production.getTotalProductionHarvestedAreaByProductAndState(state)
+
+def getCitiesProductionValuesByProductAndState(state, product):
+    return production.getCitiesProductionValuesByProductAndState(state, product)
+
+def getCitiesProductionQuantitiesByProductAndState(state, product):
+    return production.getCitiesProductionQuantitiesByProductAndState(state, product)
+
+def getCitiesProductionPlantedAreasByProductAndState(state, product):
+    return production.getCitiesProductionPlantedAreasByProductAndState(state, product)
+
+def getCitiesProductionLostAreasByProductAndState(state, product):
+    return production.getCitiesProductionLostAreasByProductAndState(state, product)
+
+def getCitiesProductionHarvestedAreasByProductAndState(state, product):
+    return production.getCitiesProductionHarvestedAreasByProductAndState(state, product)

@@ -14,6 +14,9 @@ def fill_db():
         municipios[row['Unidade da Federação e Município']] = row['Cód.']
     dados['cod_municipio'] = dados.apply(lambda x: getCodMunicipio(x, municipios), axis = 1)
     dados['cod_estado'] = dados['cod_municipio'].str[:2]
+    dados['produto'] = dados['produto'].str.replace(r'\([^)]*\)', "", regex=True)
+    dados['produto'] = dados['produto'].str.replace("*", "", regex=False)
+    
     dados.to_sql('production', con=con, if_exists='replace')
     cur = con.cursor()
     cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio, cod_estado);')
@@ -35,11 +38,12 @@ def fill_db_new_data():
     }, inplace = True)
     municipios = {}
     cidades = pd.read_csv('data/cities.csv', sep=';')[['Unidade da Federação e Município', 'Cód.']]
-    for index, row in cidades.iterrows():
+    for _, row in cidades.iterrows():
         municipios[row['Unidade da Federação e Município']] = row['Cód.']
     dados['cod_municipio'] = dados.apply(lambda x: getCodMunicipio(x, municipios), axis = 1)
     dados['cod_estado'] = dados['cod_municipio'].str[:2]
     dados.to_sql('production', con=con, if_exists='replace')
+    print(dados)
     cur = con.cursor()
     cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio, cod_estado);')
     con.commit()
@@ -192,6 +196,71 @@ def getTotalProductionHarvestedAreaByProductAndState(state):
         results.append({
             'year': row[0],
             'product': row[1],
+            'harvestedArea': row[2]
+        })
+    con.close()
+    return results
+
+def getCitiesProductionValuesByProductAndState(state, product):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, cod_municipio, SUM(valor) as valor FROM production WHERE valor IS NOT NULL AND cod_estado = \'' + state + '\' AND produto = \'' + product + '\' GROUP BY ano, cod_municipio;'):
+        results.append({
+            'year': row[0],
+            'city': row[1],
+            'value': row[2]
+        })
+    con.close()
+    return results
+
+def getCitiesProductionQuantitiesByProductAndState(state, product):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, cod_municipio, SUM(quantidade) as quantidade FROM production WHERE quantidade IS NOT NULL AND cod_estado = \'' + state + '\' AND produto = \'' + product + '\' GROUP BY ano, cod_municipio;'):
+        results.append({
+            'year': row[0],
+            'city': row[1],
+            'quantity': row[2]
+        })
+    con.close()
+    return results
+
+def getCitiesProductionPlantedAreasByProductAndState(state, product):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, cod_municipio, SUM(area_plantada) as area_plantada FROM production WHERE area_plantada IS NOT NULL AND cod_estado = \'' + state + '\' AND produto = \'' + product + '\' GROUP BY ano, cod_municipio;'):
+        results.append({
+            'year': row[0],
+            'city': row[1],
+            'plantedArea': row[2]
+        })
+    con.close()
+    return results
+
+def getCitiesProductionLostAreasByProductAndState(state, product):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, cod_municipio, SUM(area_plantada) as area_plantada, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND area_plantada IS NOT NULL AND cod_estado = \'' + state + '\' AND produto = \'' + product + '\' GROUP BY ano, cod_municipio;'):
+        results.append({
+            'year': row[0],
+            'city': row[1],
+            'lostArea': row[2]-row[3]
+        })
+    con.close()
+    return results
+
+def getCitiesProductionHarvestedAreasByProductAndState(state, product):
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT ano, cod_municipio, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND cod_estado = \'' + state + '\' AND produto = \'' + product + '\' GROUP BY ano, cod_municipio;'):
+        results.append({
+            'year': row[0],
+            'city': row[1],
             'harvestedArea': row[2]
         })
     con.close()

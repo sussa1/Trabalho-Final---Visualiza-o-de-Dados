@@ -1,6 +1,8 @@
 import React from 'react';
 import * as d3 from 'd3';
 import './AreasEmpilhadas.css';
+import Boxplot from '../Boxplot/Boxplot';
+import Button from 'react-bootstrap/Button';
 
 interface IProps {
     width: number,
@@ -21,7 +23,10 @@ interface IState {
     estado: string,
     onChangeVariableSelect: any,
     onChangeProductSelect: any,
-    onChangeStateSelect: any
+    onChangeStateSelect: any,
+    boxplotData: any,
+    boxplotProduct: any,
+    rebuild: any
 }
 
 class AreasEmpilhadas extends React.Component<IProps, IState> {
@@ -39,13 +44,18 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             estado: '',
             onChangeVariableSelect: null,
             onChangeProductSelect: null,
-            onChangeStateSelect: null
+            onChangeStateSelect: null,
+            boxplotData: [],
+            boxplotProduct: '',
+            rebuild: true
         };
         this.buildGraph = this.buildGraph.bind(this);
+        this.getYearDomainForBoxplot = this.getYearDomainForBoxplot.bind(this);
+        this.closeBoxplot = this.closeBoxplot.bind(this);
     }
 
     private buildGraph() {
-        if (!this.state.data || this.state.onChangeProductSelect != null || this.state.onChangeVariableSelect != null) {
+        if (!this.state.rebuild) {
             return;
         }
         d3.select(this.ref)
@@ -157,6 +167,17 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .style("opacity", 1)
         };
 
+        let mouseclick = (d: any, i: any) => {
+            mouseleave(d);
+            let product = i.key;
+            const apiUrl = 'http://localhost:5000/cities/' + this.state.variable + "?state=" + this.state.estado + "&product=" + product;
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    this.setState({ boxplotData: data, boxplotProduct: product });
+                });
+        }
+
         // What to do when one group is hovered
         var highlight = (d: any) => {
             // reduce opacity of all groups
@@ -262,7 +283,6 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 obj['year'] = i + this.state.minYear;
                 vals.push(obj);
             }
-            console.log(vals);
 
             //stack the data?
             const stackedData = d3.stack()
@@ -284,6 +304,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave)
+                .on("click", mouseclick)
                 .merge(areas as any)//and from now on, both the enter and the update selections
                 .transition()
                 .duration(1000)
@@ -381,7 +402,8 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 } else {
                     this.setState({ estado: state }, () => getDataForUpdateAreas());
                 }
-            }
+            },
+            rebuild: false
         });
     }
 
@@ -390,33 +412,76 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
     }
 
     componentDidUpdate() {
+        this.buildGraph();
         if (this.props.produtosSelecionados !== this.state.produtosSelecionados) {
+            if (this.state.boxplotProduct && this.state.boxplotData) {
+                this.closeBoxplot();
+            }
             this.state.onChangeProductSelect(this.props.produtosSelecionados)
         }
         if (this.props.variable !== this.state.variable) {
+            if (this.state.boxplotProduct && this.state.boxplotData) {
+                this.closeBoxplot();
+            }
             this.state.onChangeVariableSelect(this.props.variable)
         }
         if (this.props.estado !== this.state.estado) {
+            if (this.state.boxplotProduct && this.state.boxplotData) {
+                this.closeBoxplot();
+            }
             this.state.onChangeStateSelect(this.props.estado)
         }
     }
 
+    getYearDomainForBoxplot() {
+        let maxYear = 0;
+        let minYear = Infinity;
+        this.state.boxplotData.forEach((d: any) => {
+            if (d.year > maxYear) {
+                maxYear = d.year;
+            }
+            if (d.year < minYear) {
+                minYear = d.year;
+            }
+        });
+        let domain = []
+        for (let i = minYear; i <= maxYear; i++) {
+            domain.push(i.toString());
+        }
+        return domain;
+    }
+
+    closeBoxplot() {
+        this.setState({ boxplotProduct: '', boxplotData: [], rebuild: true })
+    }
+
     render() {
-        return (
-            <div className="root">
-                <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
-                    <div className="svg" >
-                        <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+        if (this.state.boxplotProduct && this.state.boxplotData) {
+            return (
+                <div>
+                    <div className="buttonDiv">
+                        <Button onClick={this.closeBoxplot} variant="secondary">Voltar</Button>
                     </div>
-                    <div style={{ overflowY: 'auto', overflowX: 'hidden' }}>
-                        <svg className={"legends" + this.props.id} style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
+                    <Boxplot width={this.props.width * 0.98} height={this.props.height - 48} data={this.state.boxplotData} domain={this.getYearDomainForBoxplot()} id={this.props.id} variable={this.props.variable} grouperKey="year"></Boxplot>
+                </div>
+            );
+        } else {
+            return (
+                <div className="root">
+                    <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
+                        <div className="svg" >
+                            <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                        </div>
+                        <div style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+                            <svg className={"legends" + this.props.id} style={{ overflowY: 'auto', overflowX: 'hidden' }}></svg>
+                        </div>
                     </div>
-                </div>
-                <div className={"tooltip-container"}>
-                    <div className="tooltip"></div>
-                </div>
-            </div >
-        );
+                    <div className={"tooltip-container"}>
+                        <div className="tooltip"></div>
+                    </div>
+                </div >
+            );
+        }
     }
 }
 

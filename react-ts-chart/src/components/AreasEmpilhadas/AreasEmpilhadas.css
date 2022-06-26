@@ -7,6 +7,10 @@
     margin: 15px;
 }
 
+.buttonDiv {
+    margin: 10px;
+}
+
 .graph {
     display: flex;
     flex-direction: row;

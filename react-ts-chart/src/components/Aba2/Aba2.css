@@ -8,3 +8,8 @@
 .titulo-grafico {
     text-align: center;
 }
+
+.mapDiv {
+    display: flex;
+    justify-content: center;
+}
