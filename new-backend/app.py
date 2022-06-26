@@ -10,6 +10,10 @@ from repository import production as production_repo
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/boxplot/lostArea', methods=['GET'])
+def getBoxplotLostArea():
+    return jsonify(production.getBoxplotLostArea())
+
 @app.route('/value', methods=['GET'])
 def getTotalProductionValue():
     return jsonify(production.getTotalProductionValueByProduct())

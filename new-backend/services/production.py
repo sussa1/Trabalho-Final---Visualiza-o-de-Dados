@@ -81,3 +81,6 @@ def getStatesProductionLostAreasByProduct(product):
 
 def getStatesProductionHarvestedAreasByProduct(product):
     return production.getStatesProductionHarvestedAreasByProduct(product)
+
+def getBoxplotLostArea():
+    return production.getBoxplotLostArea()

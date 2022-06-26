@@ -22,7 +22,7 @@ class Histograma extends React.Component<IProps, IState> {
 
     private buildGraph() {
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 80, bottom: 30, left: 30 };
+        const margin = { top: 20, right: 80, bottom: 30, left: 60 };
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 

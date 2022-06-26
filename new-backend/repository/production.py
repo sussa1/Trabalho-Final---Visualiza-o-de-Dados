@@ -331,3 +331,16 @@ def getStatesProductionHarvestedAreasByProduct(product):
         })
     con.close()
     return results
+
+def getBoxplotLostArea():
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('SELECT cod_estado, cod_municipio, SUM(area_plantada) as area_plantada, SUM(area_colhida) as area_colhida FROM production WHERE area_colhida IS NOT NULL AND area_plantada IS NOT NULL GROUP BY ano, cod_municipio, cod_estado;'):
+        results.append({
+            'stateCode': row[0],
+            'cityCode': row[1],
+            'lostArea': row[2]-row[3]
+        })
+    con.close()
+    return results

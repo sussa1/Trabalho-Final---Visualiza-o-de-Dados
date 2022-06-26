@@ -36,6 +36,8 @@ class Boxplot extends React.Component<IProps, IState> {
             return;
         }
 
+        console.log(this.props);
+
         // set the dimensions and margins of the graph
         const margin = { top: 20, right: 30, bottom: 100, left: 55 };
         const width: number = this.props.width - margin.left - margin.right;
@@ -156,6 +158,7 @@ class Boxplot extends React.Component<IProps, IState> {
         let mouseclick = (d: any) => {
             let values = groupRes.get(d.target.__data__[0])?.map(v => v[this.props.variable]);
             this.props.onChangeHistogram(true);
+            mouseleave(d);
             this.setState({ valoresHistograma: values });
         };
 
@@ -288,14 +291,14 @@ class Boxplot extends React.Component<IProps, IState> {
                     <div className="buttonDiv">
                         <Button onClick={this.closeHistograma} variant="secondary">Voltar</Button>
                     </div>
-                    <Histograma id={this.props.id} width={this.props.width} height={this.props.height} values={this.state.valoresHistograma}></Histograma>
+                    <Histograma id={this.props.id} width={this.props.width} height={this.props.height - 50} values={this.state.valoresHistograma}></Histograma>
                 </div>
             );
         } else {
             return (
                 <div>
                     <div className="svg" >
-                        <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                        <svg className="boxplot-container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                     </div>
                     <div className="tooltip-boxplot-container">
                         <div className="tooltip-boxplot"></div>
