@@ -21,6 +21,31 @@ def fill_db():
     con.close()
     print('done')
 
+def fill_db_new_data():
+    con = sqlite3.connect('database.db')
+    dados = pd.read_csv('data/lavouras_final.csv')[['Ano', 'Município', 'Produto das lavouras temporárias e permanentes', 'Área plantada ou destinada à colheita (Hectares)', 'Valor da produção (Mil Reais)', 'Área colhida (Hectares)', 'Quantidade produzida (Toneladas)']]
+    dados.rename(columns = {
+        'Ano': 'ano', 
+        'Município': 'municipio',
+        'Produto das lavouras temporárias e permanentes': 'produto',
+        'Área plantada ou destinada à colheita (Hectares)': 'area_plantada',
+        'Valor da produção (Mil Reais)': 'valor',
+        'Área colhida (Hectares)': 'area_colhida',
+        'Quantidade produzida (Toneladas)': 'quantidade'
+    }, inplace = True)
+    municipios = {}
+    cidades = pd.read_csv('data/cities.csv', sep=';')[['Unidade da Federação e Município', 'Cód.']]
+    for index, row in cidades.iterrows():
+        municipios[row['Unidade da Federação e Município']] = row['Cód.']
+    dados['cod_municipio'] = dados.apply(lambda x: getCodMunicipio(x, municipios), axis = 1)
+    dados['cod_estado'] = dados['cod_municipio'].str[:2]
+    dados.to_sql('production', con=con, if_exists='replace')
+    cur = con.cursor()
+    cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio, cod_estado);')
+    con.commit()
+    con.close()
+    print('done')
+
 def getStateProductionValues(stateCode):
     pass
 
