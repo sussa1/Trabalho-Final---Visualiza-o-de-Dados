@@ -114,6 +114,56 @@ def getStatesProductionLostAreaState():
     product = request.args.get('product')
     return jsonify(production.getStatesProductionLostAreasByProduct(product))
 
+@app.route('/stateYear/value', methods=['GET'])
+def getYearStateProductionValues():
+    year = request.args.get('year')
+    return jsonify(production.getYearStateProductionValues(year))
+
+@app.route('/stateYear/quantity', methods=['GET'])
+def getYearStateProductionQuantities():
+    year = request.args.get('year')
+    return jsonify(production.getYearStateProductionQuantities(year))
+
+@app.route('/stateYear/plantedArea', methods=['GET'])
+def getYearStateProductionPlantedAreas():
+    year = request.args.get('year')
+    return jsonify(production.getYearStateProductionPlantedAreas(year))
+
+@app.route('/stateYear/harvestedArea', methods=['GET'])
+def getYearStateProductionHarvestedAreas():
+    year = request.args.get('year')
+    return jsonify(production.getYearStateProductionHarvestedAreas(year))
+
+@app.route('/stateYear/lostArea', methods=['GET'])
+def getYearStateProductionLostAreas():
+    year = request.args.get('year')
+    return jsonify(production.getYearStateProductionLostAreas(year))
+
+@app.route('/cityYear/value', methods=['GET'])
+def getYearCityProductionValues():
+    year = request.args.get('year')
+    return jsonify(production.getYearCityProductionValues(year))
+
+@app.route('/cityYear/quantity', methods=['GET'])
+def getYearCityProductionQuantities():
+    year = request.args.get('year')
+    return jsonify(production.getYearCityProductionQuantities(year))
+
+@app.route('/cityYear/plantedArea', methods=['GET'])
+def getYearCityProductionPlantedAreas():
+    year = request.args.get('year')
+    return jsonify(production.getYearCityProductionPlantedAreas(year))
+
+@app.route('/cityYear/harvestedArea', methods=['GET'])
+def getYearCityProductionHarvestedAreas():
+    year = request.args.get('year')
+    return jsonify(production.getYearCityProductionHarvestedAreas(year))
+
+@app.route('/cityYear/lostArea', methods=['GET'])
+def getYearCityProductionLostAreas():
+    year = request.args.get('year')
+    return jsonify(production.getYearCityProductionLostAreas(year))
+
 if __name__ == "__main__":
     from waitress import serve
     serve(app, host="0.0.0.0", port=5000)

@@ -36,10 +36,8 @@ class Boxplot extends React.Component<IProps, IState> {
             return;
         }
 
-        console.log(this.props);
-
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 30, bottom: 100, left: 55 };
+        const margin = { top: 20, right: 30, bottom: 100, left: 75 };
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
         // append the svg object to the body of the page

@@ -84,3 +84,33 @@ def getStatesProductionHarvestedAreasByProduct(product):
 
 def getBoxplotLostArea():
     return production.getBoxplotLostArea()
+
+def getYearStateProductionValues(year):
+    return production.getYearStateProductionValues(year)
+
+def getYearStateProductionQuantities(year):
+    return production.getYearStateProductionQuantities(year)
+
+def getYearStateProductionLostAreas(year):
+    return production.getYearStateProductionLostAreas(year)
+
+def getYearStateProductionHarvestedAreas(year):
+    return production.getYearStateProductionHarvestedAreas(year)
+
+def getYearStateProductionPlantedAreas(year):
+    return production.getYearStateProductionPlantedAreas(year)
+
+def getYearCityProductionValues(year):
+    return production.getYearCityProductionValues(year)
+
+def getYearCityProductionQuantities(year):
+    return production.getYearCityProductionQuantities(year)
+
+def getYearCityProductionLostAreas(year):
+    return production.getYearCityProductionLostAreas(year)
+
+def getYearCityProductionHarvestedAreas(year):
+    return production.getYearCityProductionHarvestedAreas(year)
+
+def getYearCityProductionPlantedAreas(year):
+    return production.getYearCityProductionPlantedAreas(year)

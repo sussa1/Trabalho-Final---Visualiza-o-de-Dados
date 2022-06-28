@@ -34,7 +34,6 @@ class Histograma extends React.Component<IProps, IState> {
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
-        console.log(this.props.values)
         // Processa dos dados
         // X axis: scale and draw:
         var x = d3.scaleLinear()

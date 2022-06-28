@@ -8,3 +8,17 @@
 .titulo-grafico {
     text-align: center;
 }
+
+.inputs {
+    margin: 15px;
+}
+
+.variables {
+    flex-grow: 1;
+    margin: 15px;
+}
+
+.range-slider__wrap {
+    flex-grow: 1;
+    margin: 15px;
+}
