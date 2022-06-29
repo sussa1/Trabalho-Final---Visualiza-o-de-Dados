@@ -27,7 +27,7 @@ def fill_db():
 
 def fill_db_new_data():
     con = sqlite3.connect('database.db')
-    dados = pd.read_csv('data/lavouras_final_.csv')[['Ano', 'Município', 'Produto das lavouras temporárias e permanentes', 'Área plantada ou destinada à colheita (Hectares)', 'Valor da produção (Mil Reais)', 'Área colhida (Hectares)', 'Quantidade produzida (Toneladas)']]
+    dados = pd.read_csv('data/lavourasFinal.csv')[['Ano', 'Município', 'Produto das lavouras temporárias e permanentes', 'Área plantada ou destinada à colheita (Hectares)', 'Valor da produção (Mil Reais)', 'Área colhida (Hectares)', 'Quantidade produzida (Toneladas)']]
     dados.rename(columns = {
         'Ano': 'ano', 
         'Município': 'municipio',

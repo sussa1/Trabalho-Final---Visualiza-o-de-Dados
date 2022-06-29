@@ -71,7 +71,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         let getYear = (x: any) => {
             let inicial = margin.left;
             let tamanhoPorAno = width / (this.state.maxYear - this.state.minYear);
-            let dif = x - inicial;
+            let dif = x - 10 - inicial;
             return Math.round(this.state.minYear + dif / tamanhoPorAno);
         }
 
