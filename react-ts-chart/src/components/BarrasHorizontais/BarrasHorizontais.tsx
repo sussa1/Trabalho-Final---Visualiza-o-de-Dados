@@ -85,7 +85,7 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
         super(props);
         this.state = {
             currentVariable: 'value',
-            currentYear: 2019,
+            currentYear: 2020,
             onChangeProps: () => { }
         };
         this.buildGraph = this.buildGraph.bind(this);

@@ -18,7 +18,7 @@ class Aba4 extends React.Component<IProps, IState> {
     constructor(props: IProps) {
         super(props);
         this.state = {
-            selectedYear: 2019,
+            selectedYear: 2020,
             selectedVariable: "value"
         };
         this.onChangeSelectElement = this.onChangeSelectElement.bind(this);
@@ -94,7 +94,7 @@ class Aba4 extends React.Component<IProps, IState> {
                     <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Ano: <RangeSlider
                         className='years'
                         min={this.getMinYear()}
-                        max={2019}
+                        max={2020}
                         value={this.state.selectedYear}
                         onChange={changeEvent => this.setState({ selectedYear: parseFloat(changeEvent.target.value) })}
                     /></div>
