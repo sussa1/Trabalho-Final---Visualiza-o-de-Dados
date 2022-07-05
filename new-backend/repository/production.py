@@ -7,27 +7,34 @@ def getCodMunicipio(x, municipios):
 
 def fill_db():
     con = sqlite3.connect('database.db')
-    dados = pd.read_csv('data/dados.csv')[['ano', 'municipio', 'produto', 'area_plantada', 'valor', 'area_colhida', 'quantidade']]
-    dados = dados.drop(dados[dados['produto'] == 'Total'].index)
-    municipios = {}
-    cidades = pd.read_csv('data/cities.csv', sep=';')[['Unidade da Federação e Município', 'Cód.']]
-    for index, row in cidades.iterrows():
-        municipios[row['Unidade da Federação e Município']] = row['Cód.']
-    dados['cod_municipio'] = dados.apply(lambda x: getCodMunicipio(x, municipios), axis = 1)
-    dados['cod_estado'] = dados['cod_municipio'].str[:2]
-    dados['produto'] = dados['produto'].str.replace(r'\([^)]*\)', "", regex=True)
-    dados['produto'] = dados['produto'].str.replace("*", "", regex=False)
-    dados['produto'] = dados['produto'].str.strip()
-    
-    dados.to_sql('production', con=con, if_exists='replace')
-    cur = con.cursor()
-    cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio, cod_estado);')
-    con.commit()
+    fill_production_data(con)
+    fill_deforestation_data(con)
+    fill_pib_data(con)
     con.close()
     print('done')
 
-def fill_db_new_data():
-    con = sqlite3.connect('database.db')
+def fill_pib_data(con):
+    dados = pd.read_csv('data/pibPerCapita.csv')[['sigla_uf','ano','pib','PIB per capita']]
+    dados.rename(columns = {
+        'sigla_uf': 'uf', 
+        'ano': 'ano',
+        'pib': 'pib',
+        'PIB per capita': 'pib_per_capita'
+    }, inplace = True)
+    dados.to_sql('pib', con=con, if_exists='replace')
+    cur = con.cursor()
+    cur.execute('CREATE INDEX pib_index ON pib(ano, uf, pib, pib_per_capita);')
+    con.commit()
+
+def fill_deforestation_data(con):
+    dados = pd.read_csv('data/desmatamento_municipio.csv')[['ano','id_municipio','desmatado']]
+    
+    dados.to_sql('desmatamento', con=con, if_exists='replace')
+    cur = con.cursor()
+    cur.execute('CREATE INDEX desmatamento_index ON desmatamento(ano, id_municipio, desmatado);')
+    con.commit()
+
+def fill_production_data(con):
     dados = pd.read_csv('data/lavourasFinal.csv')[['Ano', 'Município', 'Produto das lavouras temporárias e permanentes', 'Área plantada ou destinada à colheita (Hectares)', 'Valor da produção (Mil Reais)', 'Área colhida (Hectares)', 'Quantidade produzida (Toneladas)']]
     dados.rename(columns = {
         'Ano': 'ano', 
@@ -50,12 +57,9 @@ def fill_db_new_data():
     dados['produto'] = dados['produto'].str.strip()
 
     dados.to_sql('production', con=con, if_exists='replace')
-    print(dados)
     cur = con.cursor()
     cur.execute('CREATE INDEX production_index ON production(ano, municipio, produto, area_plantada, valor, area_colhida, quantidade, cod_municipio, cod_estado);')
     con.commit()
-    con.close()
-    print('done')
 
 def getTotalProductionValueByProduct():
     con = sqlite3.connect('database.db')
