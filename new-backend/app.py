@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 from repository import production as production_repo
 
-production_repo.fill_db()
+# production_repo.fill_db()
 
 app = Flask(__name__)
 CORS(app)
@@ -213,6 +213,18 @@ def getStateTotalHarvestedAreaByProduct():
 def getStateTotalLostAreaByProduct():
     state = request.args.get('state')
     return jsonify(production.getStateTotalProductionLostAreas(state))
+
+@app.route('/correlation/deflorestation', methods=['GET'])
+def getCorrelationDeflorestationQuantity():
+    return jsonify(production.getCorrelationDeflorestationQuantity())
+
+@app.route('/correlation/pibPerCapita', methods=['GET'])
+def getCorrelationPibPerCapitaValue():
+    return jsonify(production.getCorrelationPibPerCapitaValue())
+
+@app.route('/correlation/pib', methods=['GET'])
+def getCorrelationPibValue():
+    return jsonify(production.getCorrelationPibValue())
 
 
 if __name__ == "__main__":

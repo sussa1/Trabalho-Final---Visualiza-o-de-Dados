@@ -123,3 +123,12 @@ def getStateTotalProductionHarvestedAreas(state):
 
 def getStateTotalProductionPlantedAreas(state):
     return production.getStateTotalProductionPlantedAreas(state)
+
+def getCorrelationDeflorestationQuantity():
+    return production.getCorrelationDeflorestationQuantity()
+
+def getCorrelationPibValue():
+    return production.getCorrelationPibValue()
+
+def getCorrelationPibPerCapitaValue():
+    return production.getCorrelationPibPerCapitaValue()

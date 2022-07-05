@@ -5,6 +5,38 @@ import pandas as pd
 def getCodMunicipio(x, municipios):
   return str(municipios[x['municipio']])
 
+def getCodEstadoFromUF(x):
+    mapaUFCod = {
+        'AC': '12',
+        'AL': '27',
+        'AP': '16',
+        'AM': '13',
+        'BA': '29',
+        'CE': '23',
+        'DF': '53',
+        'ES': '32',
+        'GO': '52',
+        'MA': '21',
+        'MT': '51',
+        'MS': '50',
+        'MG': '31',
+        'PA': '15',
+        'PB': '25',
+        'PR': '41',
+        'PE': '26',
+        'PI': '22',
+        'RN': '24',
+        'RS': '43',
+        'RJ': '33',
+        'RO': '11',
+        'RR': '14',
+        'SC': '42',
+        'SP': '35',
+        'SE': '28',
+        'TO': '17'
+    }
+    return mapaUFCod[x['uf']]
+
 def fill_db():
     con = sqlite3.connect('database.db')
     fill_production_data(con)
@@ -21,14 +53,20 @@ def fill_pib_data(con):
         'pib': 'pib',
         'PIB per capita': 'pib_per_capita'
     }, inplace = True)
+    dados['cod_uf'] = dados.apply(getCodEstadoFromUF, axis = 1)
     dados.to_sql('pib', con=con, if_exists='replace')
     cur = con.cursor()
-    cur.execute('CREATE INDEX pib_index ON pib(ano, uf, pib, pib_per_capita);')
+    cur.execute('CREATE INDEX pib_index ON pib(ano, uf, cod_uf, pib, pib_per_capita);')
     con.commit()
 
 def fill_deforestation_data(con):
-    dados = pd.read_csv('data/desmatamento_municipio.csv')[['ano','id_municipio','desmatado']]
-    
+    dados = pd.read_csv('data/desmatamento_municipio.csv')[['ano','id_municipio','incremento']]
+    dados.rename(columns = {
+        'id_municipio': 'id_municipio', 
+        'ano': 'ano',
+        'incremento': 'desmatado'
+    }, inplace = True)
+    dados = dados.drop(dados[dados['ano'] == 2000].index)
     dados.to_sql('desmatamento', con=con, if_exists='replace')
     cur = con.cursor()
     cur.execute('CREATE INDEX desmatamento_index ON desmatamento(ano, id_municipio, desmatado);')
@@ -573,6 +611,57 @@ def getStateTotalProductionPlantedAreas(state):
         results.append({
             'year': row[0],
             'harvestedArea': row[1]
+        })
+    con.close()
+    return results
+
+def getCorrelationDeflorestationQuantity():
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('''SELECT production.ano, SUM(production.quantidade) as quantidade, SUM(desmatamento.desmatado) as desmatado, production.municipio
+                                FROM production 
+                                INNER JOIN desmatamento ON production.ano = desmatamento.ano AND production.cod_municipio = desmatamento.id_municipio
+                                WHERE production.quantidade IS NOT NULL GROUP BY production.ano, production.municipio;'''):
+        results.append({
+            'year': row[0],
+            'city': row[3],
+            'quantity': row[1],
+            'destroyed': row[2]
+        })
+    con.close()
+    return results
+
+def getCorrelationPibValue():
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('''SELECT production.ano, pib.uf, SUM(production.valor) as valor, pib.pib as pib
+                                FROM production 
+                                INNER JOIN pib ON production.ano = pib.ano AND production.cod_estado = pib.cod_uf
+                                WHERE production.valor IS NOT NULL GROUP BY production.ano, pib.uf;'''):
+        results.append({
+            'year': row[0],
+            'uf': row[1],
+            'value': row[2],
+            'pib': row[3]
+        })
+    con.close()
+    return results
+
+def getCorrelationPibPerCapitaValue():
+    con = sqlite3.connect('database.db')
+    cur = con.cursor()
+    results = []
+    for row in cur.execute('''SELECT production.ano, pib.uf, SUM(production.valor) as valor, pib.pib_per_capita as pib
+                                FROM production 
+                                INNER JOIN pib ON production.ano = pib.ano AND production.cod_estado = pib.cod_uf
+                                WHERE production.valor IS NOT NULL GROUP BY production.ano, pib.uf;'''):
+        results.append({
+            'year': row[0],
+            'uf': row[1],
+            'value': row[2],
+            'pib_per_capita': row[3]
         })
     con.close()
     return results

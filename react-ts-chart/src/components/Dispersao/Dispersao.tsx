@@ -7,6 +7,7 @@ import './Dispersao.css'
 interface IProps {
     width: number,
     height: number,
+    year: number
 }
 
 interface IState {
