@@ -205,6 +205,7 @@ class Linha extends React.Component<IProps, IState> {
         function mousemove(e: any) {
             // recover coordinate we need
             var x0 = Math.round(x.invert(e[0]));
+
             var i = bisect(hoverData, x0, 1);
             var selectedData = hoverData[i];
 
@@ -254,7 +255,7 @@ class Linha extends React.Component<IProps, IState> {
 
     componentDidMount() {
         if (!this.state || !this.state.data) {
-            const apiUrl = 'http://localhost:3000/' + this.props.variavel;
+            const apiUrl = 'http://localhost:5000/' + this.props.variavel;
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
