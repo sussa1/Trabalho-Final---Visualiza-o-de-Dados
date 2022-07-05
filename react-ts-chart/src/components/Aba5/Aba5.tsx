@@ -14,8 +14,8 @@ class Aba5 extends React.Component<IProps, IState> {
     render() {
         return (
             <div>
-                <Dispersao width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} year={null}></Dispersao>
-                <Dispersao width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} year={null}></Dispersao>
+                <Dispersao width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} data={null}></Dispersao>
+                <Dispersao width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} data={null}></Dispersao>
             </div>
         )
     }

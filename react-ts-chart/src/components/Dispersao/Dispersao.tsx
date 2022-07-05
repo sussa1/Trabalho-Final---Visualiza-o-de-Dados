@@ -7,7 +7,7 @@ import './Dispersao.css'
 interface IProps {
     width: number,
     height: number,
-    year: number
+    data: any
 }
 
 interface IState {
@@ -30,36 +30,33 @@ class Dispersao extends React.Component<IProps, IState> {
             .append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-        //Read the data
-        d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/2_TwoNum.csv").then( function(data) {
-
-            // Add X axis
-            var x = d3.scaleLinear()
+        // Add X axis
+        var x = d3.scaleLinear()
             .domain([0, 4000])
             .range([ 0, width ]);
-            svg.append("g")
+
+        svg.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x));
-        
-            // Add Y axis
-            var y = d3.scaleLinear()
+    
+        // Add Y axis
+        var y = d3.scaleLinear()
             .domain([0, 700000])
             .range([ height, 0]);
-            svg.append("g")
+
+        svg.append("g")
             .call(d3.axisLeft(y));
         
-            // Add dots
-            svg.append('g')
+        // Add dots
+        svg.append('g')
             .selectAll("dot")
-            .data(data)
+            .data(this.props.data)
             .enter()
             .append("circle")
-                .attr("cx", function (d) { return x(Number(d.GrLivArea)); } )
-                .attr("cy", function (d) { return y(Number(d.SalePrice)); } )
+                .attr("cx", function (d: any) { return x(Number(d.GrLivArea)); } )
+                .attr("cy", function (d: any) { return y(Number(d.SalePrice)); } )
                 .attr("r", 1.5)
-                .style("fill", "#69b3a2")
-  
-  })
+                .style("fill", "#69b3a2");
     }
 
     componentDidMount() {
