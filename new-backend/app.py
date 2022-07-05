@@ -164,6 +164,57 @@ def getYearCityProductionLostAreas():
     year = request.args.get('year')
     return jsonify(production.getYearCityProductionLostAreas(year))
 
+@app.route('/product/value', methods=['GET'])
+def getProductValueByProduct():
+    product = request.args.get('product')
+    return jsonify(production.getProductProductionValues(product))
+
+@app.route('/product/quantity', methods=['GET'])
+def getProductQuantityByProduct():
+    product = request.args.get('product')
+    return jsonify(production.getProductProductionQuantities(product))
+
+@app.route('/product/plantedArea', methods=['GET'])
+def getProductPlantedAreaByProduct():
+    product = request.args.get('product')
+    return jsonify(production.getProductProductionPlantedAreas(product))
+
+@app.route('/product/harvestedArea', methods=['GET'])
+def getProductHarvestedAreaByProduct():
+    product = request.args.get('product')
+    return jsonify(production.getProductProductionHarvestedAreas(product))
+
+@app.route('/product/lostArea', methods=['GET'])
+def getProductLostAreaByProduct():
+    product = request.args.get('product')
+    return jsonify(production.getProductProductionLostAreas(product))
+
+@app.route('/stateTotal/value', methods=['GET'])
+def getStateTotalValueByProduct():
+    state = request.args.get('state')
+    return jsonify(production.getStateTotalProductionValues(state))
+
+@app.route('/stateTotal/quantity', methods=['GET'])
+def getStateTotalQuantityByProduct():
+    state = request.args.get('state')
+    return jsonify(production.getStateTotalProductionQuantities(state))
+
+@app.route('/stateTotal/plantedArea', methods=['GET'])
+def getStateTotalPlantedAreaByProduct():
+    state = request.args.get('state')
+    return jsonify(production.getStateTotalProductionPlantedAreas(state))
+
+@app.route('/stateTotal/harvestedArea', methods=['GET'])
+def getStateTotalHarvestedAreaByProduct():
+    state = request.args.get('state')
+    return jsonify(production.getStateTotalProductionHarvestedAreas(state))
+
+@app.route('/stateTotal/lostArea', methods=['GET'])
+def getStateTotalLostAreaByProduct():
+    state = request.args.get('state')
+    return jsonify(production.getStateTotalProductionLostAreas(state))
+
+
 if __name__ == "__main__":
     from waitress import serve
     serve(app, host="0.0.0.0", port=5000)

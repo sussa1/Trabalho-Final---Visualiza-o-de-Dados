@@ -93,3 +93,33 @@ def getYearCityProductionHarvestedAreas(year):
 
 def getYearCityProductionPlantedAreas(year):
     return production.getYearCityProductionPlantedAreas(year)
+
+def getProductProductionValues(product):
+    return production.getProductProductionValues(product)
+
+def getProductProductionQuantities(product):
+    return production.getProductProductionQuantities(product)
+
+def getProductProductionLostAreas(product):
+    return production.getProductProductionLostAreas(product)
+
+def getProductProductionHarvestedAreas(product):
+    return production.getProductProductionHarvestedAreas(product)
+
+def getProductProductionPlantedAreas(product):
+    return production.getProductProductionPlantedAreas(product)
+
+def getStateTotalProductionValues(state):
+    return production.getStateTotalProductionValues(state)
+
+def getStateTotalProductionQuantities(state):
+    return production.getStateTotalProductionQuantities(state)
+
+def getStateTotalProductionLostAreas(state):
+    return production.getStateTotalProductionLostAreas(state)
+
+def getStateTotalProductionHarvestedAreas(state):
+    return production.getStateTotalProductionHarvestedAreas(state)
+
+def getStateTotalProductionPlantedAreas(state):
+    return production.getStateTotalProductionPlantedAreas(state)
