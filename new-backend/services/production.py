@@ -129,6 +129,3 @@ def getCorrelationDeflorestationQuantity():
 
 def getCorrelationPibValue():
     return production.getCorrelationPibValue()
-
-def getCorrelationPibPerCapitaValue():
-    return production.getCorrelationPibPerCapitaValue()

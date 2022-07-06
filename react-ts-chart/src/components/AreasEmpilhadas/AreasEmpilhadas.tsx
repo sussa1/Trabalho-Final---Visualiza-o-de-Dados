@@ -122,7 +122,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
             d3.select(".tooltip-area-empilhada-container")
                 .style("transform", "scale(1,1)");
             d3.select(".tooltip-area-empilhada")
-                .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
+                .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + Math.round(value * 10000) / 10000);
 
             // reduce opacity of all groups
             d3.selectAll(".myArea" + this.props.id).style("opacity", .1)
@@ -153,7 +153,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                 .style("left", (d.pageX + 20) + "px")
                 .style("top", (d.pageY - 80) + "px");
             d3.select(".tooltip-area-empilhada")
-                .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + value);
+                .html("Produto: " + product + "<br>Ano: " + currentYear + "<br>Valor: " + Math.round(value * 10000) / 10000);
         };
 
         let mouseleave = (d: any) => {

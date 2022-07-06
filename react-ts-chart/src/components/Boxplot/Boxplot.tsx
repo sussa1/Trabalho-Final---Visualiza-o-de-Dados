@@ -113,11 +113,11 @@ class Boxplot extends React.Component<IProps, IState> {
         svg.append("g").call(d3.axisLeft(y))
 
         let mouseover = (d: any) => {
-            let max = d.target.__data__[1].max.toPrecision(3);
-            let q3 = d.target.__data__[1].q3.toPrecision(3);
-            let median = d.target.__data__[1].median.toPrecision(3);
-            let q1 = d.target.__data__[1].q1.toPrecision(3);
-            let min = d.target.__data__[1].min.toPrecision(3);
+            let max = d.target.__data__[1].max;
+            let q3 = d.target.__data__[1].q3;
+            let median = d.target.__data__[1].median;
+            let q1 = d.target.__data__[1].q1;
+            let min = d.target.__data__[1].min;
             d3.select(".tooltip-boxplot-container")
                 .style("opacity", 1)
                 .style("z-index", 1000);
@@ -125,7 +125,7 @@ class Boxplot extends React.Component<IProps, IState> {
             d3.select(".tooltip-boxplot-container")
                 .style("transform", "scale(1,1)");
             d3.select(".tooltip-boxplot")
-                .html("Máximo: " + max + "<br>3º Quartil: " + q3 + "<br>Mediana: " + median + "<br>1º Quartil: " + q1 + "<br>Mínimo: " + min);
+                .html("Máximo: " + Math.round(max * 10000.0) / 10000.0 + "<br>3º Quartil: " + Math.round(q3 * 10000.0) / 10000.0 + "<br>Mediana: " + Math.round(median * 10000.0) / 10000.0 + "<br>1º Quartil: " + Math.round(q1 * 10000.0) / 10000.0 + "<br>Mínimo: " + Math.round(min * 10000.0) / 10000.0);
 
             d3.selectAll(".myRectangle" + this.props.id)
                 .style("opacity", 0.1)

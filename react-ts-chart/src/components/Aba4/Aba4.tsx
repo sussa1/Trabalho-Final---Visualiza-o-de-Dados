@@ -88,7 +88,7 @@ class Aba4 extends React.Component<IProps, IState> {
                         defaultValue={this.getSelectElements()[0]}
                         className="variables"
                         classNamePrefix="select"
-                        placeholder="Escolha o(s) produto(s)"
+                        placeholder="Escolha o produto"
                         onChange={this.onChangeSelectElement}
                     /> </div>
                     <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Ano: <RangeSlider

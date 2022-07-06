@@ -69,7 +69,7 @@ class Histograma extends React.Component<IProps, IState> {
             d3.select(".tooltip-histograma-container")
                 .style("transform", "scale(1,1)");
             d3.select(".tooltip-histograma")
-                .html("Intervalo: " + sorted_data[0] + " a " + sorted_data[sorted_data.length - 1] + "<br>Tamanho do Bin: " + d.target.__data__.length);
+                .html("Intervalo: " + Math.round(sorted_data[0] * 10000) / 10000 + " a " + Math.round(sorted_data[sorted_data.length - 1] * 10000) / 10000 + "<br>Tamanho do Bin: " + d.target.__data__.length);
 
             d3.selectAll(".myRectangle" + this.props.id)
                 .style("opacity", 0.1)

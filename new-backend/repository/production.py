@@ -636,7 +636,7 @@ def getCorrelationPibValue():
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
-    for row in cur.execute('''SELECT production.ano, pib.uf, SUM(production.valor) as valor, pib.pib as pib
+    for row in cur.execute('''SELECT production.ano, pib.uf, SUM(production.valor) as valor, pib.pib as pib, pib.pib_per_capita as pib_per_capita
                                 FROM production 
                                 INNER JOIN pib ON production.ano = pib.ano AND production.cod_estado = pib.cod_uf
                                 WHERE production.valor IS NOT NULL GROUP BY production.ano, pib.uf;'''):
@@ -644,24 +644,8 @@ def getCorrelationPibValue():
             'year': row[0],
             'uf': row[1],
             'value': row[2],
-            'pib': row[3]
-        })
-    con.close()
-    return results
-
-def getCorrelationPibPerCapitaValue():
-    con = sqlite3.connect('database.db')
-    cur = con.cursor()
-    results = []
-    for row in cur.execute('''SELECT production.ano, pib.uf, SUM(production.valor) as valor, pib.pib_per_capita as pib
-                                FROM production 
-                                INNER JOIN pib ON production.ano = pib.ano AND production.cod_estado = pib.cod_uf
-                                WHERE production.valor IS NOT NULL GROUP BY production.ano, pib.uf;'''):
-        results.append({
-            'year': row[0],
-            'uf': row[1],
-            'value': row[2],
-            'pib_per_capita': row[3]
+            'pib': row[3],
+            'pib_per_capita': row[4]
         })
     con.close()
     return results

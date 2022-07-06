@@ -129,7 +129,7 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
             d3.select(".tooltip-barra-horizontal-container")
                 .style("transform", "scale(1,1)");
             d3.select(".tooltip-barra-horizontal")
-                .html("Valor: " + d.target.__data__[this.props.variable]);
+                .html("Valor: " + Math.round(d.target.__data__[this.props.variable] * 10000) / 10000);
 
             d3.selectAll(".myRect" + this.props.id)
                 .style("opacity", 0.1)
@@ -146,7 +146,7 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
             d3.select(".tooltip-barra-horizontal-container")
                 .style("transform", "scale(1,1)");
             d3.select(".tooltip-barra-horizontal")
-                .html("Valor: " + d.target.__data__[this.props.variable]);
+                .html("Valor: " + Math.round(d.target.__data__[this.props.variable] * 10000) / 10000);
 
             d3.selectAll(".myRect" + this.props.id)
                 .style("opacity", 0.1)
