@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 
 from services import production
 from flask_cors import CORS
+import os
 
 from repository import production as production_repo
 
@@ -9,6 +10,14 @@ production_repo.fill_db()
 
 app = Flask(__name__)
 CORS(app)
+
+@app.route('/')
+def index():
+    return app.send_static_file('../react-ts-chart/build/index.html')
+
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('../react-ts-chart/build/index.html')
 
 @app.route('/boxplot/lostArea', methods=['GET'])
 def getBoxplotLostArea():
@@ -224,5 +233,4 @@ def getCorrelationPibValue():
 
 
 if __name__ == "__main__":
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", debug=False, port=os.environ.get('PORT', 5000))
