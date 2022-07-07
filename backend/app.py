@@ -23,6 +23,26 @@ def manifest():
 def favicon():
     return send_from_directory('./build', 'favicon.ico')
 
+@app.route('/asset-manifest.json')
+def asset_manifest():
+    return send_from_directory('./build', 'asset-manifest.json')
+
+@app.route('/logo192.png')
+def logo192():
+    return send_from_directory('./build', 'logo192.png')
+
+@app.route('/logo512.png')
+def logo512():
+    return send_from_directory('./build', 'logo512.png')
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('./build', 'robots.txt')
+
+@app.route('/uf.json')
+def uf_json():
+    return send_from_directory('./build', 'uf.json')
+
 @app.route('/boxplot/lostArea', methods=['GET'])
 def getBoxplotLostArea():
     return jsonify(production.getBoxplotLostArea())
