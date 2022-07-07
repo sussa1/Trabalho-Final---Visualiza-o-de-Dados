@@ -22,11 +22,11 @@ class App extends React.Component<IProps, IState> {
       <div className="App">
         <Tabs>
           <TabList>
-            <Tab>Aba 1</Tab>
-            <Tab>Aba 2</Tab>
-            <Tab>Aba 3</Tab>
-            <Tab>Aba 4</Tab>
-            <Tab>Aba 5</Tab>
+            <Tab>Dados do País</Tab>
+            <Tab>Dados dos Estados</Tab>
+            <Tab>Comparações</Tab>
+            <Tab>Rankings</Tab>
+            <Tab>Correlações</Tab>
           </TabList>
 
           <TabPanel>
