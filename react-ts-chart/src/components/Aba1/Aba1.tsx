@@ -58,7 +58,7 @@ class Aba1 extends React.Component<IProps, IState> {
     }
 
     componentDidMount() {
-        let apiUrl = 'http://localhost:5000/boxplot/lostArea';
+        let apiUrl = 'boxplot/lostArea';
         fetch(apiUrl)
             .then((response) => response.json())
             .then((data) => {

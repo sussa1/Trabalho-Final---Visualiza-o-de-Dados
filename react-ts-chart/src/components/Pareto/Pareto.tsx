@@ -144,7 +144,7 @@ class Pareto extends React.Component<IProps, IState> {
 
     componentDidMount() {
         if (!this.state || !this.state.data) {
-            const apiUrl = 'http://localhost:5000/state/' + this.props.variable + "?state=" + this.props.estado;
+            const apiUrl = 'state/' + this.props.variable + "?state=" + this.props.estado;
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
@@ -173,7 +173,7 @@ class Pareto extends React.Component<IProps, IState> {
 
     componentDidUpdate() {
         if (this.state.estado !== this.props.estado) {
-            const apiUrl = 'http://localhost:5000/state/' + this.props.variable + "?state=" + this.props.estado;
+            const apiUrl = 'state/' + this.props.variable + "?state=" + this.props.estado;
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
@@ -194,10 +194,10 @@ class Pareto extends React.Component<IProps, IState> {
                         }
                     });
 
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, estado: this.props.estado  })
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, estado: this.props.estado })
                 });
         }
-        
+
         this.buildGraph();
     }
 

@@ -35,7 +35,7 @@ class Aba5 extends React.Component<IProps, IState> {
     }
 
     getPIBData() {
-        let apiUrl = 'http://localhost:5000/correlation/pib';
+        let apiUrl = 'correlation/pib';
         fetch(apiUrl)
             .then((response) => response.json())
             .then((data) => {
@@ -64,7 +64,7 @@ class Aba5 extends React.Component<IProps, IState> {
     }
 
     getDeflorestation() {
-        let apiUrl = 'http://localhost:5000/correlation/deflorestation';
+        let apiUrl = 'correlation/deflorestation';
         fetch(apiUrl)
             .then((response) => response.json())
             .then((data) => {
