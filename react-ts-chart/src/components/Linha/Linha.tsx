@@ -49,7 +49,7 @@ class Linha extends React.Component<IProps, IState> {
         d3.select(this.ref)
             .html("");
         // set the dimensions and margins of the graph
-        const margin = { top: 10, right: 100, bottom: 30, left: 80 };
+        const margin = {top: 10, right: 100, bottom: 30, left: 80};
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 
@@ -70,7 +70,7 @@ class Linha extends React.Component<IProps, IState> {
 
         // Add X axis --> it is a date format
         const x = d3.scaleLinear()
-            .domain([this.state.minYear - 1, this.state.maxYear + 1])
+            .domain([this.state.minYear-1, this.state.maxYear+1])
             .range([0, width]);
         svg.append("g")
             .attr("transform", `translate(0, ${height})`)
@@ -102,7 +102,7 @@ class Linha extends React.Component<IProps, IState> {
             .style("fill", "none")
 
         // This allows to find the closest X index of the mouse:
-        var bisect = d3.bisector(function (d: any) { return d[0]; }).left;
+        var bisect = d3.bisector(function(d: any) { return d[0]; }).left;
 
         // Create the circle that travels along the curve of chart
         var focus = svg
@@ -147,9 +147,9 @@ class Linha extends React.Component<IProps, IState> {
             let apiUrl = '';
             let filteredData: any[] = []
             if (this.props.products) {
-                apiUrl = 'product/' + this.props.variable + '?product=' + selectedProduct;
+                apiUrl = 'http://localhost:5000/product/' + this.props.variable + '?product=' + selectedProduct;
             } else {
-                apiUrl = 'stateTotal/' + this.props.variable + '?state=' + selectedProduct;
+                apiUrl = 'http://localhost:5000/stateTotal/' + this.props.variable + '?state=' + selectedProduct;
             }
             fetch(apiUrl)
                 .then((response) => response.json())
@@ -183,10 +183,10 @@ class Linha extends React.Component<IProps, IState> {
                 .transition()
                 .duration(500)
                 .attr("d", d3.line()
-                    .x(function (d) { return x(+d[0]); })
-                    .y(function (d) { return y(+d[1]); })
+                    .x(function(d) { return x(+d[0]); })
+                    .y(function(d) { return y(+d[1]); })
                 )
-                .attr("stroke", function (d) { return String(myColor(selectedProduct)) })
+                .attr("stroke", function(d){ return String(myColor(selectedProduct)) })
 
             hoverData = filteredData.slice();
         }
@@ -204,10 +204,10 @@ class Linha extends React.Component<IProps, IState> {
                 .transition()
                 .duration(500)
                 .attr("d", d3.line()
-                    .x(function (d) { return x(+d[0]); })
-                    .y(function (d) { return y(+d[1]); })
+                    .x(function(d) { return x(+d[0]); })
+                    .y(function(d) { return y(+d[1]); })
                 )
-                .attr("stroke", function (d) { return String(myColor(selectedProduct)) })
+                .attr("stroke", function(d){ return String(myColor(selectedProduct)) })
 
             hoverDataSecond = filteredData.slice();
         }
@@ -220,7 +220,7 @@ class Linha extends React.Component<IProps, IState> {
             .attr('width', width)
             .attr('height', height)
             .on('mouseover', mouseover)
-            .on('mousemove', (e) => { mousemove(d3.pointer(e)) })
+            .on('mousemove', (e) => {mousemove(d3.pointer(e)) })
             .on('mouseout', mouseout);
 
 
@@ -232,7 +232,7 @@ class Linha extends React.Component<IProps, IState> {
             }
             if (hoverDataSecond.length > 0 && hoverDataSecond[0][0] && hoverDataSecond[0][1]) {
                 focusSecond.style("opacity", 1)
-                focusTextSecond.style("opacity", 1)
+                focusTextSecond.style("opacity",1)
             }
         }
 
@@ -251,36 +251,36 @@ class Linha extends React.Component<IProps, IState> {
                 .attr("cy", y(selectedData[1]))
             if (selectedData) focusText
                 .html("Ano:" + selectedData[0] + ",  " + "Quantidade:" + selectedData[1])
-                .attr("x", x(selectedData[0]) + 5)
+                .attr("x", x(selectedData[0])+5)
                 .attr("y", y(selectedData[1]))
-
+            
 
             if (selectedDataSecond) focusSecond
                 .attr("cx", x(selectedDataSecond[0]))
                 .attr("cy", y(selectedDataSecond[1]))
             if (selectedDataSecond) focusTextSecond
                 .html("Ano:" + selectedDataSecond[0] + ",  " + "Quantidade:" + selectedDataSecond[1])
-                .attr("x", x(selectedDataSecond[0]) + 5)
+                .attr("x", x(selectedDataSecond[0])+5)
                 .attr("y", y(selectedDataSecond[1]))
         }
-
+        
         function mouseout() {
             focus.style("opacity", 0)
-            focusText.style("opacity", 0)
+            focusText.style("opacity",0)
 
             focusSecond.style("opacity", 0)
-            focusTextSecond.style("opacity", 0)
+            focusTextSecond.style("opacity",0)
         }
 
         // When the button is changed, run the updateChart function
-        d3.select("#selectButton").on("change", function (event, d) {
+        d3.select("#selectButton").on("change", function(event,d) {
             // recover the option that has been chosen
             const selectedOption = d3.select(this).property("value")
             // run the updateChart function with this selected option
             update(selectedOption)
         })
 
-        d3.select("#selectButtonSecond").on("change", function (event, d) {
+        d3.select("#selectButtonSecond").on("change", function(event,d) {
             const selectedOption = d3.select(this).property("value")
             updateSecond(selectedOption)
         })
@@ -314,12 +314,12 @@ class Linha extends React.Component<IProps, IState> {
             this.setState({ firstSelectedItem: this.props.firstSelectedItem });
             this.state.onChangeFirstItem(this.state.firstSelectedItem);
         }
-
+        
         if (this.props.secondSelectedItem !== this.state.secondSelectedItem) {
             this.setState({ secondSelectedItem: this.props.secondSelectedItem });
             this.state.onChangeSecondItem(this.state.secondSelectedItem);
         }
-
+        
         console.log(this.state)
     }
 

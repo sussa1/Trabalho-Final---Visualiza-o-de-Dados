@@ -173,9 +173,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         let mouseclick = (d: any, i: any) => {
             mouseleave(d);
             let product = i.key;
-            let apiUrl = 'cities/' + this.state.variable + "?state=" + this.state.estado + "&product=" + product;
+            let apiUrl = 'http://localhost:5000/cities/' + this.state.variable + "?state=" + this.state.estado + "&product=" + product;
             if (this.props.pais) {
-                apiUrl = 'states/' + this.state.variable + "?product=" + product;
+                apiUrl = 'http://localhost:5000/states/' + this.state.variable + "?product=" + product;
             }
             fetch(apiUrl)
                 .then((response) => response.json())
@@ -217,9 +217,9 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
 
         const getDataForUpdateAreas = () => {
             if (this.state.variable && this.state.produtosSelecionados && this.state.produtosSelecionados.length && (this.state.estado || this.props.pais)) {
-                let apiUrl = 'state/' + this.state.variable + "?state=" + this.state.estado;
+                let apiUrl = 'http://localhost:5000/state/' + this.state.variable + "?state=" + this.state.estado;
                 if (this.props.pais) {
-                    apiUrl = '' + this.state.variable;
+                    apiUrl = 'http://localhost:5000/' + this.state.variable;
                 }
                 fetch(apiUrl)
                     .then((response) => response.json())

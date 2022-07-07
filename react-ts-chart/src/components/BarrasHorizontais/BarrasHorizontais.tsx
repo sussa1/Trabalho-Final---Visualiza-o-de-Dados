@@ -178,7 +178,7 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
 
         const updateBars = (year: any, variable: any) => {
             if (this.props.city) {
-                let apiUrl = 'cityYear/' + this.props.variable + '?year=' + year;
+                let apiUrl = 'http://localhost:5000/cityYear/' + this.props.variable + '?year=' + year;
                 fetch(apiUrl)
                     .then((response) => response.json())
                     .then((data) => {
@@ -233,7 +233,7 @@ class BarrasHorizontais extends React.Component<IProps, IState> {
                         }
                     })
             } else {
-                let apiUrl = 'stateYear/' + this.props.variable + '?year=' + year;
+                let apiUrl = 'http://localhost:5000/stateYear/' + this.props.variable + '?year=' + year;
                 fetch(apiUrl)
                     .then((response) => response.json())
                     .then((data) => {
