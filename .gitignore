@@ -1,7 +1,7 @@
 */node_modules/*
 
 /backend/data/*
-/backend/database.sqlite
+/backend/database.db
 
 /new-backend/database.db
 /new-backend/data/*
