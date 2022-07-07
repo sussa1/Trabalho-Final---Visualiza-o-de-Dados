@@ -310,6 +310,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     .y0(function (d) { return y(d[0]); })
                     .y1(function (d) { return y(d[1]); })
                 )
+                .style("cursor", "pointer")
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave)
@@ -322,6 +323,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
                     .y0(function (d) { return y(d[0]); })
                     .y1(function (d) { return y(d[1]); })
                 )
+                .style("cursor", "pointer")
                 .attr("class", (d: any) => { return "myArea" + this.props.id + " " + d.key.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') + this.props.id })
                 .style("fill", function (d) { return String(color(d.key)) });
 
