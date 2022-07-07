@@ -8,54 +8,36 @@ interface IProps {
 }
 
 interface IState {
+    products: boolean,
     selectedVariable: string,
-    selectedYear: number
+    selectedFirstItem: string,
+    selectedSecondItem: string
 }
 
 class Aba3 extends React.Component<IProps, IState> {
 
+    produtos = ['Abacate', 'Abacaxi', 'Alfafa fenada', 'Algodão arbóreo', 'Algodão herbáceo', 'Alho', 'Amendoim', 'Arroz', 'Aveia', 'Azeitona', 'Açaí', 'Banana', 'Batata-doce', 'Batata-inglesa', 'Borracha', 'Cacau', 'Café Arábica', 'Café Canephora', 'Café Total', 'Caju', 'Cana para forragem', 'Cana-de-açúcar', 'Caqui', 'Castanha de caju', 'Cebola', 'Centeio', 'Cevada', 'Chá-da-índia', 'Coco-da-baía', 'Dendê', 'Erva-mate', 'Ervilha', 'Fava', 'Feijão', 'Figo', 'Fumo', 'Girassol', 'Goiaba', 'Guaraná', 'Juta', 'Laranja', 'Limão', 'Linho', 'Malva', 'Mamona', 'Mamão', 'Mandioca', 'Manga', 'Maracujá', 'Marmelo', 'Maçã', 'Melancia', 'Melão', 'Milho', 'Noz', 'Palmito', 'Pera', 'Pimenta-do-reino', 'Pêssego', 'Rami', 'Sisal ou agave', 'Soja', 'Sorgo', 'Tangerina', 'Tomate', 'Trigo', 'Triticale', 'Tungue', 'Urucum', 'Uva'];
+
     constructor(props: IProps) {
         super(props);
         this.state = {
-            selectedYear: 2019,
-            selectedVariable: "value"
+            products: true,
+            selectedVariable: "value",
+            selectedFirstItem: "",
+            selectedSecondItem: "",
         };
-        this.onChangeSelectElement = this.onChangeSelectElement.bind(this);
+        this.onChangeSelectFirstElement = this.onChangeSelectFirstElement.bind(this);
+        this.onChangeSelectSecondElement = this.onChangeSelectSecondElement.bind(this);
         this.getSelectElements = this.getSelectElements.bind(this);
     }
 
     getSelectElements() {
-        return [
-            {
-                value: "value", label: "Valor"
-            },
-            {
-                value: "quantity", label: "Quantidade"
-            },
-            {
-                value: "plantedArea", label: "Área Plantada"
-            },
-            {
-                value: "lostArea", label: "Área Perdida"
-            },
-            {
-                value: "harvestedArea", label: "Área Colhida"
-            },
-        ];
-    }
-
-    getSelectedVariableText() {
-        if (this.state.selectedVariable === "value") {
-            return "Valor";
-        } else if (this.state.selectedVariable === "quantity") {
-            return "Quantidade";
-        } else if (this.state.selectedVariable === "plantedArea") {
-            return "Área Plantada";
-        } else if (this.state.selectedVariable === "lostArea") {
-            return "Área Perdida";
-        } else if (this.state.selectedVariable === "harvestedArea") {
-            return "Área Colhida";
-        }
+        return this.produtos.map((d: any) => {
+            return {
+                value: d,
+                label: d
+            };
+        });
     }
 
     getMinYear() {
@@ -65,35 +47,59 @@ class Aba3 extends React.Component<IProps, IState> {
         return 1974;
     }
 
-    onChangeSelectElement(d: any) {
+    onChangeSelectFirstElement(d: any) {
         let selectedOption = d.value;
         if (!selectedOption) {
-            selectedOption = 'value';
+            selectedOption = '';
         }
-        if ((selectedOption === 'lostArea' || selectedOption === 'plantedArea') && this.state.selectedYear < 1988) {
-            this.setState({ selectedYear: 1988, selectedVariable: selectedOption });
-        } else {
-            this.setState({ selectedVariable: selectedOption });
+        this.setState({ selectedFirstItem: selectedOption });
+    }
+
+    onChangeSelectSecondElement(d: any) {
+        let selectedOption: string = d.value;
+        if (!selectedOption) {
+            selectedOption = '';
         }
+        this.setState({ selectedSecondItem: selectedOption });
     }
 
     render() {
         return (
             <div>
-                <div className="inputs">
-                    <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Variável: <Select
-                        name="variables"
+                <div className="inputs" style={{display: "flex"}}>
+                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "30%" }}> {this.state.products? "Produto 1:" : "Estado 1"} <Select
+                        name="products1"
                         options={this.state == null ? [] : this.getSelectElements()}
-                        defaultValue={this.getSelectElements()[0]}
-                        className="variables"
+                        className="basic-select-1"
                         classNamePrefix="select"
-                        placeholder="Escolha o(s) produto(s)"
-                        onChange={this.onChangeSelectElement}
+                        placeholder="Escolha o produto"
+                        onChange={this.onChangeSelectFirstElement}
+                    /> </div>
+                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "30%" }}> {this.state.products? "Produto 2:" : "Estado 2"} <Select
+                        name="products2"
+                        options={this.state == null ? [] : this.getSelectElements()}
+                        className="basic-select-2"
+                        classNamePrefix="select"
+                        placeholder="Escolha o produto"
+                        onChange={this.onChangeSelectSecondElement}
                     /> </div>
                 </div>
                 <div className="graficos">
-                    <div>
-                        <Linha width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} variavel={this.state.selectedVariable}></Linha>
+                    <div style={{ width: "47vw", height: "52vh" }}>
+                        <h3 className="titulo-grafico">Valor </h3>
+                        <Linha id="1" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='value' products={true} firstSelectedItem={this.state.selectedFirstItem} secondSelectedItem={this.state.selectedSecondItem}></Linha>
+                    </div>
+                    <div style={{ width: "47vw", height: "52vh" }}>
+                        <h3 className="titulo-grafico">Quantidade </h3>
+                        <Linha id="2" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='quantity' products={true} firstSelectedItem={this.state.selectedFirstItem} secondSelectedItem={this.state.selectedSecondItem}></Linha>
+                    </div>
+                    <div style={{ width: "47vw", height: "52vh" }}>
+                        <h3 className="titulo-grafico">Área Plantada </h3>
+                        <Linha id="3" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='plantedArea' products={true} firstSelectedItem={this.state.selectedFirstItem} secondSelectedItem={this.state.selectedSecondItem}></Linha>
+                    </div>
+                    <div style={{ width: "47vw", height: "52vh" }}>
+                        <h3 className="titulo-grafico">Área Perdida </h3>
+                        <Linha id="4" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='lostArea' products={true} firstSelectedItem={this.state.selectedFirstItem} secondSelectedItem={this.state.selectedSecondItem}></Linha>
                     </div>
                 </div>
                 

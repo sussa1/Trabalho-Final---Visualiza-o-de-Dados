@@ -113,6 +113,10 @@ class Aba2 extends React.Component<IProps, IState> {
                             <h3 className="titulo-grafico">Área Perdida - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="4" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='lostArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado} pais={false}></AreasEmpilhadas>
                         </div>
+                        <div style={{ width: "100vw", height: "52vh" }}>
+                            <h3 className="titulo-grafico">Área Perdida por Estado</h3>
+                            <Pareto id="5" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} variable='value' estado={this.state.estado}></Pareto>
+                        </div>
 
                     </div>
                 </div >

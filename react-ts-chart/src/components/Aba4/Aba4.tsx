@@ -3,6 +3,7 @@ import BarrasHorizontais from '../BarrasHorizontais/BarrasHorizontais';
 import Select from 'react-select';
 import './Aba4.css';
 import RangeSlider from 'react-bootstrap-range-slider';
+import BumpChart from '../BumpChart/BumpChart';
 
 interface IProps {
 
@@ -100,6 +101,10 @@ class Aba4 extends React.Component<IProps, IState> {
                     /></div>
                 </div>
                 <div className="graficos">
+                    <div style={{ width: "100vw", height: "70vh" }}>
+                        <h3 className="titulo-grafico">Área Perdida por Estado</h3>
+                        <BumpChart id="3" width={window.innerWidth * 0.98} height={window.innerHeight * 0.67} variable={this.state.selectedVariable}></BumpChart>
+                    </div>
                     <div style={{ width: "48vw", height: "80vh" }}>
                         <h3 className="titulo-grafico">{this.getSelectedVariableText()} em {this.state.selectedYear} por Estado</h3>
                         <BarrasHorizontais id="1" width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} city={false} variable={this.state.selectedVariable} year={this.state.selectedYear}></BarrasHorizontais>

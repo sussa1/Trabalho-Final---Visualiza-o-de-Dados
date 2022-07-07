@@ -7,11 +7,14 @@ import './Pareto.css'
 interface IProps {
     width: number,
     height: number,
-    variavel: string
+    variable: string,
+    id: string,
+    estado: string
 }
 
 interface IState {
     data: any[],
+    estado: string,
     minYear: number,
     maxYear: number,
     conjuntoProdutos: string[],
@@ -22,6 +25,9 @@ class Pareto extends React.Component<IProps, IState> {
     ref!: SVGSVGElement;
 
     private buildGraph() {
+        d3.select(this.ref)
+            .html("");
+
         // set the dimensions and margins of the graph
         const margin = { top: 10, right: 10, bottom: 80, left: 50 };
         const width: number = this.props.width - margin.left - margin.right;
@@ -35,9 +41,11 @@ class Pareto extends React.Component<IProps, IState> {
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
         const Data: any = {};
+        console.log(this.state.data)
         this.state.data.forEach(instance => {
-            Data[instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "")] ? Data[instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "")] += instance.quantity : Data[instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "")] = instance.quantity;
+            Data[instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "")] ? Data[instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "")] += instance[this.props.variable] : Data[instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "")] = instance[this.props.variable];
         })
+
 
         const proccessedData: any = Object.keys(Data).map((produto: any) => {
             return {
@@ -46,7 +54,6 @@ class Pareto extends React.Component<IProps, IState> {
             }
         });
 
-        console.log(proccessedData);
         // sort data
         proccessedData.sort(function (b: any, a: any) {
             return a.Valor - b.Valor;
@@ -137,14 +144,14 @@ class Pareto extends React.Component<IProps, IState> {
 
     componentDidMount() {
         if (!this.state || !this.state.data) {
-            const apiUrl = 'http://localhost:5000/' + this.props.variavel;
-            console.log(apiUrl)
+            const apiUrl = 'http://localhost:5000/state/' + this.props.variable + "?state=" + this.props.estado;
             fetch(apiUrl)
                 .then((response) => response.json())
                 .then((data) => {
                     let minYear = Infinity;
                     let maxYear = 0;
                     let conjuntoProdutos = new Set<string>();
+                    console.log(data)
                     data.forEach((d: any) => {
                         if (d.year > maxYear) {
                             maxYear = d.year;
@@ -158,14 +165,39 @@ class Pareto extends React.Component<IProps, IState> {
                         }
                     });
 
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data })
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, estado: this.props.estado })
                 });
         }
 
     }
 
     componentDidUpdate() {
-        // activate   
+        if (this.state.estado !== this.props.estado) {
+            const apiUrl = 'http://localhost:5000/state/' + this.props.variable + "?state=" + this.props.estado;
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    let minYear = Infinity;
+                    let maxYear = 0;
+                    let conjuntoProdutos = new Set<string>();
+                    console.log(data)
+                    data.forEach((d: any) => {
+                        if (d.year > maxYear) {
+                            maxYear = d.year;
+                        }
+                        if (d.year < minYear) {
+                            minYear = d.year;
+                        }
+                        if (d.product !== "Total") {
+                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                            conjuntoProdutos.add(nomeCertoProduto);
+                        }
+                    });
+
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, estado: this.props.estado  })
+                });
+        }
+        
         this.buildGraph();
     }
 

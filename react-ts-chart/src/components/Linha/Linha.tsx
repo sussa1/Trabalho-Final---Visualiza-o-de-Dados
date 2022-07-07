@@ -1,11 +1,16 @@
 import React from 'react';
 import * as d3 from 'd3';
 import './Linha.css'
+import { cp } from 'fs/promises';
 
 interface IProps {
     width: number,
     height: number,
-    variavel: string
+    variable: string,
+    firstSelectedItem: string,
+    secondSelectedItem: string,
+    products: boolean,
+    id: string,
 }
 
 interface IState {
@@ -14,13 +19,35 @@ interface IState {
     maxYear: number,
     conjuntoProdutos: string[],
     produtosSelecionados: string[],
+    firstSelectedItem: string,
+    secondSelectedItem: string,
+    onChangeFirstItem: any,
+    onChangeSecondItem: any
 }
 
 class Linha extends React.Component<IProps, IState> {
     ref!: SVGSVGElement;
 
+    constructor(props: IProps) {
+        super(props);
+        this.state = {
+            data: [],
+            minYear: 0,
+            maxYear: Infinity,
+            conjuntoProdutos: [],
+            produtosSelecionados: [],
+            firstSelectedItem: '',
+            secondSelectedItem: '',
+            onChangeFirstItem: null,
+            onChangeSecondItem: null
+        };
+        this.buildGraph = this.buildGraph.bind(this);
+    }
+
     private buildGraph() {
 
+        d3.select(this.ref)
+            .html("");
         // set the dimensions and margins of the graph
         const margin = {top: 10, right: 100, bottom: 30, left: 80};
         const width: number = this.props.width - margin.left - margin.right;
@@ -35,8 +62,7 @@ class Linha extends React.Component<IProps, IState> {
 
 
         // List of groups (here I have one group per column)
-        const products = this.state.conjuntoProdutos.sort()
-        products.unshift("-")
+        const products = ['Abacate', 'Abacaxi', 'Alfafa fenada', 'Algodão arbóreo', 'Algodão herbáceo', 'Alho', 'Amendoim', 'Arroz', 'Aveia', 'Azeitona', 'Açaí', 'Banana', 'Batata-doce', 'Batata-inglesa', 'Borracha', 'Cacau', 'Café Arábica', 'Café Canephora', 'Café Total', 'Caju', 'Cana para forragem', 'Cana-de-açúcar', 'Caqui', 'Castanha de caju', 'Cebola', 'Centeio', 'Cevada', 'Chá-da-índia', 'Coco-da-baía', 'Dendê', 'Erva-mate', 'Ervilha', 'Fava', 'Feijão', 'Figo', 'Fumo', 'Girassol', 'Goiaba', 'Guaraná', 'Juta', 'Laranja', 'Limão', 'Linho', 'Malva', 'Mamona', 'Mamão', 'Mandioca', 'Manga', 'Maracujá', 'Marmelo', 'Maçã', 'Melancia', 'Melão', 'Milho', 'Noz', 'Palmito', 'Pera', 'Pimenta-do-reino', 'Pêssego', 'Rami', 'Sisal ou agave', 'Soja', 'Sorgo', 'Tangerina', 'Tomate', 'Trigo', 'Triticale', 'Tungue', 'Urucum', 'Uva'];
 
         var hoverData: any = [];
 
@@ -56,24 +82,6 @@ class Linha extends React.Component<IProps, IState> {
             .range([height, 0]);
         svg.append("g")
             .call(d3.axisLeft(y));
-
-        // add the options to the button
-        d3.select("#selectButton")
-            .selectAll('option')
-            .data(products)
-            .enter()
-            .append('option')
-            .text(function (d) { return d; }) // text showed in the menu
-            .attr("value", function (d) { return d; }) // corresponding value returned by the button
-
-        // add the options to the second button
-        d3.select("#selectButtonSecond")
-            .selectAll('option')
-            .data(products)
-            .enter()
-            .append('option')
-            .text(function (d) { return d; }) // text showed in the menu
-            .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
         // A color scale: one color for each group
         const myColor = d3.scaleOrdinal()
@@ -128,18 +136,48 @@ class Linha extends React.Component<IProps, IState> {
             .attr("text-anchor", "left")
             .attr("alignment-baseline", "middle")
 
-        // A function that update the chart
         const update = (selectedProduct: any) => {
-            // Create new data with the selection?
+            // const filteredData: any = [];
+            // this.state.data.forEach(instance => {
+            //     if (instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === selectedProduct) {
+            //         filteredData.push([instance.year, instance[this.props.variable]]);
+            //     }
+            // });
 
-            const filteredData: any = [];
-            this.state.data.forEach(instance => {
-                if (instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === selectedProduct) {
-                    filteredData.push([instance.year, instance.quantity]);
-                }
-            });
+            let apiUrl = '';
+            let filteredData: any[] = []
+            if (this.props.products) {
+                apiUrl = 'http://localhost:5000/product/' + this.props.variable + '?product=' + selectedProduct;
+            } else {
+                apiUrl = 'http://localhost:5000/stateTotal/' + this.props.variable + '?state=' + selectedProduct;
+            }
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    let minYear = Infinity;
+                    let maxYear = 0;
+                    let conjuntoProdutos = new Set<string>();
+                    data.forEach((d: any) => {
+                        if (d.year > maxYear) {
+                            maxYear = d.year;
+                        }
+                        if (d.year < minYear) {
+                            minYear = d.year;
+                        }
+                        if (d.product !== "Total") {
+                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
+                            conjuntoProdutos.add(nomeCertoProduto);
+                        }
+                    });
 
-            // Give these new data to update line
+                    filteredData = data;
+
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, firstSelectedItem: this.props.firstSelectedItem, secondSelectedItem: this.props.secondSelectedItem })
+                });
+
+
+            console.log(filteredData)
+
             line
                 .datum(filteredData)
                 .transition()
@@ -153,18 +191,14 @@ class Linha extends React.Component<IProps, IState> {
             hoverData = filteredData.slice();
         }
 
-        // A function that update the chart
         const updateSecond = (selectedProduct: any) => {
-            // Create new data with the selection?
-
             const filteredData: any = [];
             this.state.data.forEach(instance => {
                 if (instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === selectedProduct) {
-                    filteredData.push([instance.year, instance.quantity]);
+                    filteredData.push([instance.year, instance[this.props.variable]]);
                 }
             });
 
-            // Give these new data to update line
             secondLine
                 .datum(filteredData)
                 .transition()
@@ -251,46 +285,47 @@ class Linha extends React.Component<IProps, IState> {
             updateSecond(selectedOption)
         })
 
+        this.setState({
+            onChangeFirstItem: (v: any) => {
+                if (!v || v.length === 0) {
+                    this.setState({ firstSelectedItem: "Uva" }, () => update(this.state.firstSelectedItem));
+                } else {
+                    this.setState({ firstSelectedItem: this.state.firstSelectedItem }, () => update(this.state.firstSelectedItem));
+                }
+            },
+            onChangeSecondItem: (v: any) => {
+                if (!v || v.length === 0) {
+                    this.setState({ secondSelectedItem: "Uva" }, () => updateSecond(this.state.secondSelectedItem));
+                } else {
+                    this.setState({ secondSelectedItem: this.state.secondSelectedItem }, () => updateSecond(this.state.secondSelectedItem));
+                }
+            }
+        });
+
     }
 
     componentDidMount() {
-        if (!this.state || !this.state.data) {
-            const apiUrl = 'http://localhost:5000/' + this.props.variavel;
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                    let minYear = Infinity;
-                    let maxYear = 0;
-                    let conjuntoProdutos = new Set<string>();
-                    data.forEach((d: any) => {
-                        if (d.year > maxYear) {
-                            maxYear = d.year;
-                        }
-                        if (d.year < minYear) {
-                            minYear = d.year;
-                        }
-                        if (d.product !== "Total") {
-                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
-                            conjuntoProdutos.add(nomeCertoProduto);
-                        }
-                    });
-
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data })
-                });
-        }
-
+        this.buildGraph();
     }
 
     componentDidUpdate() {
-        // activate   
         this.buildGraph();
+        if (this.props.firstSelectedItem !== this.state.firstSelectedItem) {
+            this.setState({ firstSelectedItem: this.props.firstSelectedItem });
+            this.state.onChangeFirstItem(this.state.firstSelectedItem);
+        }
+        
+        if (this.props.secondSelectedItem !== this.state.secondSelectedItem) {
+            this.setState({ secondSelectedItem: this.props.secondSelectedItem });
+            this.state.onChangeSecondItem(this.state.secondSelectedItem);
+        }
+        
+        console.log(this.state)
     }
 
     render() {
         return (
             <div>
-                <select id="selectButton"></select>
-                <select id="selectButtonSecond"></select>
                 <div className="svg" >
                     <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                 </div>
