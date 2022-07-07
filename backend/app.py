@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory, render_template
 
 from services import production
 from flask_cors import CORS
@@ -6,18 +6,22 @@ import os
 
 from repository import production as production_repo
 
-production_repo.fill_db()
+#production_repo.fill_db()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="build/static", template_folder="build")
 CORS(app)
 
-@app.route('/')
-def index():
-    return app.send_static_file('../react-ts-chart/build/index.html')
+@app.route("/")
+def home():
+    return render_template('index.html')
 
-@app.errorhandler(404)
-def not_found(e):
-    return app.send_static_file('../react-ts-chart/build/index.html')
+@app.route("/manifest.json")
+def manifest():
+    return send_from_directory('./build', 'manifest.json')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('./build', 'favicon.ico')
 
 @app.route('/boxplot/lostArea', methods=['GET'])
 def getBoxplotLostArea():
