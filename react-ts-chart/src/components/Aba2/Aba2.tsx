@@ -114,8 +114,20 @@ class Aba2 extends React.Component<IProps, IState> {
                             <AreasEmpilhadas id="4" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='lostArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado} pais={false}></AreasEmpilhadas>
                         </div>
                         <div style={{ width: "100vw", height: "52vh" }}>
-                            <h3 className="titulo-grafico">Área Perdida por Estado</h3>
+                            <h3 className="titulo-grafico">Valor em relação ao total - {this.state.nomeEstado}</h3>
                             <Pareto id="5" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} variable='value' estado={this.state.estado}></Pareto>
+                        </div>
+                        <div style={{ width: "100vw", height: "52vh" }}>
+                            <h3 className="titulo-grafico">Quantidade em relação ao total - {this.state.nomeEstado}</h3>
+                            <Pareto id="6" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} variable='quantity' estado={this.state.estado}></Pareto>
+                        </div>
+                        <div style={{ width: "100vw", height: "52vh" }}>
+                            <h3 className="titulo-grafico">Área Plantada em relação ao total - {this.state.nomeEstado}</h3>
+                            <Pareto id="7" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} variable='plantedArea' estado={this.state.estado}></Pareto>
+                        </div>
+                        <div style={{ width: "100vw", height: "52vh" }}>
+                            <h3 className="titulo-grafico">Área Perdida em relação ao total - {this.state.nomeEstado}</h3>
+                            <Pareto id="8" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} variable='lostArea' estado={this.state.estado}></Pareto>
                         </div>
 
                     </div>
