@@ -204,11 +204,11 @@ class BumpChart extends React.Component<IProps, IState> {
         // Unhighlight
         const doNotHighlight = function(event: any, d: any){
             d3.selectAll(".line")
-                .transition().duration(200).delay(1000)
+                .transition().duration(200).delay(100)
                 .style("stroke", function(d:any): any{ return( color(d.State))} )
                 .style("opacity", "1")
             d3.selectAll(".circle")
-                .transition().duration(200).delay(1000)
+                .transition().duration(200).delay(100)
                 .style("stroke", function(d:any): any{ return( color(d.State))} )
                 .style("fill", function(d:any): any{ return( color(d.State))} )
                 .style("opacity", "1")
@@ -270,9 +270,7 @@ class BumpChart extends React.Component<IProps, IState> {
                 lastYearRankState[data[this.state.variable]] = this.mapaCodigoEstado[data.State];
                 lastYearCodeState[data[this.state.variable]] = data.State;
             }
-    
-            console.log(lastYearRankState);
-    
+        
             // Draw the axis:
             svg.selectAll("myAxisLast")
                 // For each dimension of the dataset I add a 'g' element:
