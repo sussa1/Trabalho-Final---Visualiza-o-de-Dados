@@ -1,0 +1,29 @@
+.tooltip-bump-chart-container {
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    transition: all .2s .1s ease-in-out;
+}
+
+.tooltip-bump-chart {
+    border-radius: 0.7em 0.7em 0.7em 0;
+    z-index: 1000;
+    padding: 8px;
+    width: fit-content;
+    background-color: hsla(0, 0%, 10%, 0.9);
+    color: #fff;
+    content: attr(data-tooltip);
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.graph {
+    display: flex;
+    flex-direction: row;
+}

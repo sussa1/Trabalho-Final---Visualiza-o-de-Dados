@@ -205,7 +205,7 @@ class Pareto extends React.Component<IProps, IState> {
         return (
             <div>
                 <div className="svg" >
-                    <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                    <svg className="container-pareto" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                 </div>
                 <div className="tooltip-container">
                     <div className="tooltip"></div>

@@ -271,7 +271,7 @@ class Dispersao extends React.Component<IProps, IState> {
                     name="year"
                     options={this.state == null ? [] : this.getSelectElements()}
                     defaultValue={this.getSelectElements()[0] as any}
-                    className="years"
+                    className="years-dispersao"
                     classNamePrefix="select"
                     placeholder="Escolha o ano"
                     onChange={this.onChangeSelectElement}

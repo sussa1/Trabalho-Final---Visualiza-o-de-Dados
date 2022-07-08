@@ -11,6 +11,8 @@
 
 .inputs {
     margin: 15px;
+    align-items: bottom;
+    display: flex;
 }
 
 .variables {
@@ -18,7 +20,11 @@
     margin: 15px;
 }
 
+.years {
+    margin-inline: 15px;
+    margin-block: 2px;
+}
+
 .range-slider__wrap {
     flex-grow: 1;
-    margin: 15px;
 }

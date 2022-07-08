@@ -78,12 +78,26 @@ class BumpChart extends React.Component<IProps, IState> {
         'Tocantins': '17'
     };
 
+    constructor(props: IProps) {
+        super(props);
+        this.state = {
+            data: [],
+            variable: "value"
+        };
+        this.buildGraph = this.buildGraph.bind(this);
+        this.getData = this.getData.bind(this);
+
+    }
+
     private buildGraph() {
+        if (!(this.state.data && this.state.data.length && this.state.data[0] && this.state.data[0].length)) {
+            return;
+        }
         d3.select(this.ref)
             .html("");
 
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 15, bottom: 100, left: 230 };
+        const margin = { top: 20, right: 100, bottom: 100, left: 30 };
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 
@@ -97,26 +111,39 @@ class BumpChart extends React.Component<IProps, IState> {
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
         // Parse the Data
-        let data: any[] = [];
-
         const color: any = d3.scaleOrdinal()
             .domain(Object.keys(this.mapaCodigoEstado))
-            .range(["#7dfc00","#0ec434","#228c68","#8ad8e8","#235b54","#29bdab","#3998f5","#37294f","#277da7","#3750db","#f22020","#991919","#ffcba5","#e68f66","#c56133","#96341c","#ffc413","#f47a22","#2f2aa0","#b732cc","#772b9d","#f07cab","#d30b94","#edeff3","#c3a5b4","#946aa2","#5d4c86"])
+            .range(["#7dfc00","#0ec434","#228c68","#8ad8e8","#235b54","#29bdab","#3998f5","#37294f","#277da7","#3750db","#f22020","#991919","#ffcba5","#e68f66","#c56133","#96341c","#ffc413","#f47a22","#2f2aa0","#b732cc","#772b9d","#f07cab","#d30b94","#c2eaaa","#c3a5b4","#946aa2","#5d4c86"])
 
-        const dimensions = ['1974', '1975', '1976', '1977', '1978', '1979', '1980', '1981', '1982', '1983', '1984', '1985', '1986', '1987', '1988', '1989', '1990', '1991', '1992', '1993', '1994', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020'];
-    
-        // console.log((this.state.data));
+        // const color = (c: string) => d3.interpolateRainbow(Object.keys(this.mapaCodigoEstado).indexOf(c) / Object.keys(this.mapaCodigoEstado).length);
 
-        // let dataTest = Object.keys(this.mapaCodigoEstado).map((estado:String) => {
-        //     let obj: any = {}
-        //     obj['1974'] = (this.state.data)[0].filter((elem: any) => elem.state === estado)[this.state.variable];
-        //     return obj;
-        // })
+        const dimensions:any[] = [];
+        for (let year=this.getMinYear(); year<2021; year++) {
+            dimensions.push(year.toString())
+        };
+        
+        let initial_data: any = {};
+        
+        let circle_data: any[] = Object.keys(initial_data);
 
-        // console.log(dataTest);
+        (this.state.data).forEach((year:any, index:any) => {
+            year.forEach((state: any) => {
+                if (!(state.state in initial_data)) {
+                    initial_data[state.state] = {}
+                }
+                initial_data[state.state][(index+this.getMinYear()).toString()] = state[this.state.variable];
+                initial_data[state.state]['State'] = state.state;
 
-        data = [{'1974': 1, '1975':5, 'Species': '31'}, {'1974': 3, '1975':2, 'Species': '13'},]
-
+                let obj:any = {}
+                obj[this.state.variable] = state[this.state.variable]
+                obj['State'] = state.state;
+                obj['Year'] = index+this.getMinYear();
+                circle_data.push(obj)
+            })
+        })
+        
+        let data = Object.values(initial_data);
+        
         // For each dimension, I build a linear scale. I store all in a y object
         const y: any = {}
         for (let i in dimensions) {
@@ -132,108 +159,225 @@ class BumpChart extends React.Component<IProps, IState> {
         .range([0, width])
         .domain(dimensions);
     
-        // Highlight the specie that is hovered
+        // Highlight the state that is hovered
         const highlight = function(event: any, d: any){
-            let selected_specie = d.Species
+            let selected_state = d.State
         
             // first every group turns grey
             d3.selectAll(".line")
                 .transition().duration(200)
                 .style("stroke", "lightgrey")
-                .style("opacity", "0.2")
-            // Second the hovered specie takes its color
-            d3.selectAll("." + selected_specie)
+                .style("opacity", "0.1")
+            d3.selectAll(".circle")
                 .transition().duration(200)
-                .style("stroke", color(selected_specie))
+                .style("stroke", "lightgrey")
+                .style("fill", "lightgrey")
+                .style("opacity", "0.1")
+
+            // Second the hovered state takes its color
+            d3.selectAll(".state-" + selected_state)
+                .transition().duration(200)
+                .style("stroke", color(selected_state))
                 .style("opacity", "1")
+            d3.selectAll(".state---" + selected_state)
+                .transition().duration(200)
+                .style("stroke", color(selected_state))
+                .style("fill", color(selected_state))
+                .style("opacity", "1")
+
+        }
+
+        const highlightCircle = (event: any, d: any) => {
+            let selected_state = d.State
+            // first every group turns grey
+            highlight(event, d);
+            d3.select(".tooltip-bump-chart-container")
+                .style("opacity", 1)
+                .style("z-index", 1000000)
+                .style("left", (event.pageX + 15) + "px")
+                .style("top", (event.pageY - 30) + "px")
+                .style("transform", "scale(1,1)");
+            d3.select(".tooltip-bump-chart")
+                .html("Estado: " + this.mapaCodigoEstado[d.State] + "<br>Rank: " + d[this.state.variable] + "<br>Ano: " + d.Year);
         }
     
         // Unhighlight
         const doNotHighlight = function(event: any, d: any){
-        d3.selectAll(".line")
-            .transition().duration(200).delay(1000)
-            .style("stroke", function(d:any): any{ return( color(d.Species))} )
-            .style("opacity", "1")
-        }
+            d3.selectAll(".line")
+                .transition().duration(200).delay(1000)
+                .style("stroke", function(d:any): any{ return( color(d.State))} )
+                .style("opacity", "1")
+            d3.selectAll(".circle")
+                .transition().duration(200).delay(1000)
+                .style("stroke", function(d:any): any{ return( color(d.State))} )
+                .style("fill", function(d:any): any{ return( color(d.State))} )
+                .style("opacity", "1")
+
+            d3.selectAll(".tooltip-bump-chart-container")
+                .style("opacity", 0)
+                .style("z-index", -1000000)
+                .style("transform", "scale(0.1,0.1)")
+                .style("transition", "all .2s ease-in-out");
+            }
+            
+            // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
+            function path(d: any) {
+                return d3.line()(dimensions.map(function(p:any):any { return [x(p), y[p](d[p])]; }));
+            }
+            
+            // Draw the axis:
+            svg.selectAll("myAxisFirst")
+                // For each dimension of the dataset I add a 'g' element:
+                .data(dimensions.slice(0,1)).enter()
+                .append("g")
+                .attr("class", "axis")
+                // I translate this element to its right position on the x axis
+                .attr("transform", function(d) { return `translate(${x(d)})`})
+                // And I build the axis with the call function
+                .each(function(d) { d3.select(this).call(d3.axisLeft(y).ticks(27).scale(y[d])); })
+                // Add axis title
+                .append("text")
+                    .style("text-anchor", "middle")
+                    .attr("y", height+20)
+                    .text(function(d) { return d; })
+                    .style("fill", "black")
+
+            let maxYear = 2020 - this.getMinYear() + 1;
     
-        // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
-        function path(d: any) {
-            return d3.line()(dimensions.map(function(p:any):any { return [x(p), y[p](d[p])]; }));
-        }
+            svg.selectAll("myAxis")
+                // For each dimension of the dataset I add a 'g' element:
+                .data(dimensions.slice(1,maxYear-1)).enter()
+                .append("g")
+                .attr("class", "axis")
+                // I translate this element to its right position on the x axis
+                .attr("transform", function(d) { return `translate(${x(d)})`})
+                // And I build the axis with the call function
+                .each(function(d) { d3.select(this).call(d3.axisLeft(y).ticks(0).tickFormat("" as any).scale(y[d])).call(g => g.select('path').style("opacity", 0.3)); })
+                // Add axis title
+                .append("text")
+                    .style("text-anchor", "middle")
+                    .attr("y", height+20)
+                    .text(function(d) { return d; })
+                    .style("fill", "black")
     
-        // Draw the lines
-        svg
+            let lastYearData = circle_data.filter(elem => elem.Year === 2020)
+    
+            let lastYearRankState:any = {};
+    
+            let lastYearCodeState:any = {};
+    
+            for (let data of lastYearData) {
+                lastYearRankState[data[this.state.variable]] = this.mapaCodigoEstado[data.State];
+                lastYearCodeState[data[this.state.variable]] = data.State;
+            }
+    
+            console.log(lastYearRankState);
+    
+            // Draw the axis:
+            svg.selectAll("myAxisLast")
+                // For each dimension of the dataset I add a 'g' element:
+                .data(dimensions.slice(maxYear-1,maxYear)).enter()
+                .append("g")
+                .attr("class", "axis")
+                // I translate this element to its right position on the x axis
+                .attr("transform", function(d) { return `translate(${x(d)})`})
+                // And I build the axis with the call function
+                .each(function(d) { d3.select(this).call(d3.axisRight(y).ticks(27).tickFormat((v:any) => {return lastYearRankState[v];}).scale(y[d])); })
+                // Add axis title
+                .append("text")
+                    .style("text-anchor", "middle")
+                    .attr("y", height+20)
+                    .text(function(d) { return d; })
+                    .style("fill", "black")
+
+            // Draw the lines
+            svg
         .selectAll("myPath")
         .data(data)
         .join("path")
-            .attr("class", function (d) { return "line " + d.Species } ) // 2 class for each line: 'line' and the group name
+            .attr("class", function (d: any) { return "line state-" + d.State } ) // 2 class for each line: 'line' and the group name
             .attr("d",  path)
             .style("fill", "none" )
-            .style("stroke", function(d:any):any{ return( color(d.Species))} )
-            .style("opacity", 0.5)
+            .style("stroke", function(d:any):any{ return( color(d.State))} )
+            .style("opacity", 1)
+            .attr("stroke-width", function(d:any):any{ return(3)})
             .on("mouseover", highlight)
             .on("mouseleave", doNotHighlight )
+
+        
+        // Draw the lines
+        svg
+        .selectAll("myCircle")
+        .data(circle_data)
+        .join("circle")
+            .attr("class", function (d: any) { return "circle state---" + d.State } ) // 2 class for each line: 'line' and the group name
+            .attr("r", 4)
+            .attr("cx", function (d:any):any { return x(d.Year.toString()) })
+            .attr("cy", (d:any):any => { return y[d.Year.toString()](d[this!.state.variable]) })
+            .style("stroke", function(d:any):any{ return( color(d.State))} )
+            .style("fill", function(d:any):any{ return( color(d.State))} )
+            .style("opacity", 1)
+            .on("mouseover", highlightCircle)
+            .on("mouseleave", doNotHighlight )
+
     
-        // Draw the axis:
-        svg.selectAll("myAxis")
-        // For each dimension of the dataset I add a 'g' element:
-        .data(dimensions).enter()
-        .append("g")
-        .attr("class", "axis")
-        // I translate this element to its right position on the x axis
-        .attr("transform", function(d) { return `translate(${x(d)})`})
-        // And I build the axis with the call function
-        .each(function(d) { d3.select(this).call(d3.axisLeft(y).ticks(5).scale(y[d])); })
-        // Add axis title
-        .append("text")
-            .style("text-anchor", "middle")
-            .attr("y", -9)
-            .text(function(d) { return d; })
-            .style("fill", "black")
+
+
     
     }
+
+    getMinYear() {
+        if (this.state.variable === 'plantedArea' || this.state.variable === 'lostArea') {
+            return 1988;
+        } else {
+            return 1974; 
+        }
+    }
         
-    // }
+    getData() {
+        let fullData = Array(47);
+        let promises: any[] = [];
+        for (let year=(this.getMinYear()); year < 2021; year++) {
+            let apiUrl = 'http://localhost:5000/stateYear/' + this.props.variable + '?year=' + year;
+            promises.push(
+            fetch(apiUrl)
+                .then((response) => response.json())
+            );
+        }
+
+        Promise.all(promises).then((values) => {
+            values.forEach((data, index) => {
+                let year = index+this.getMinYear();
+                if (data.length < 27) {
+                    Object.keys(this.mapaCodigoEstado).forEach(state => {
+                        if (!data.find((instance:any) => instance.state === state)) {
+                            let obj:any = {}
+                            obj['state'] = state;
+                            obj[this.props.variable] = 0;
+                            data.push(obj)
+                        }
+                    })
+                }
+                fullData[year-this.getMinYear()] = (data.sort((a:any,b:any)=>b[this.state.variable] - a[this.state.variable]).map((elem:any, index:any) => {
+                    let obj:any = {};
+                    obj['state'] = elem.state;
+                    obj[this.state.variable] = index + 1;
+                    return obj;
+                } ))
+            })
+            this.setState({ data: fullData }, this.buildGraph)
+        })
+
+    }
 
     componentDidMount() {
-        if (!this.state || !this.state.data) {
-            let fullData: any[] = [];
-            for (let year=1974; year < 2021; year++) {
-                let apiUrl = 'http://localhost:5000/stateYear/' + this.props.variable + '?year=' + year;
-                fetch(apiUrl)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        let minYear = Infinity;
-                        let maxYear = 0;
-                        data.forEach((d: any) => {
-                            if (d.year > maxYear) {
-                                maxYear = d.year;
-                            }
-                            if (d.year < minYear) {
-                                minYear = d.year;
-                            }
-                        });
-                        fullData.push(data.sort((a:any,b:any)=>b[this.state.variable] - a[this.state.variable]).map((elem:any, index:any) => {
-                            let obj:any = {};
-                            obj['state'] = elem.state;
-                            obj[this.state.variable] = index + 1;
-                            return obj;
-                        } ))
-                    });
-            }
-
-            console.log(fullData)
-
-            this.setState({ data: fullData })
-        }
+        this.getData()
     }
 
     componentDidUpdate() {
         if (this.props.variable !== this.state.variable) {
-            this.setState({ variable: this.props.variable});
+            this.setState({ variable: this.props.variable}, this.getData);
         }
-
-        this.buildGraph();
     }
 
     render() {
@@ -244,8 +388,8 @@ class BumpChart extends React.Component<IProps, IState> {
                         <svg ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                     </div>
                 </div>
-                <div className="tooltip-barra-horizontal-container">
-                    <div className="tooltip-barra-horizontal"></div>
+                <div className="tooltip-bump-chart-container">
+                    <div className="tooltip-bump-chart"></div>
                 </div>
             </div >
         );

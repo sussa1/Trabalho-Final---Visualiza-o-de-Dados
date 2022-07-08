@@ -285,22 +285,22 @@ class Linha extends React.Component<IProps, IState> {
             updateSecond(selectedOption)
         })
 
-        this.setState({
-            onChangeFirstItem: (v: any) => {
-                if (!v || v.length === 0) {
-                    this.setState({ firstSelectedItem: "Uva" }, () => update(this.state.firstSelectedItem));
-                } else {
-                    this.setState({ firstSelectedItem: this.state.firstSelectedItem }, () => update(this.state.firstSelectedItem));
-                }
-            },
-            onChangeSecondItem: (v: any) => {
-                if (!v || v.length === 0) {
-                    this.setState({ secondSelectedItem: "Uva" }, () => updateSecond(this.state.secondSelectedItem));
-                } else {
-                    this.setState({ secondSelectedItem: this.state.secondSelectedItem }, () => updateSecond(this.state.secondSelectedItem));
-                }
-            }
-        });
+        // this.setState({
+        //     onChangeFirstItem: (v: any) => {
+        //         if (!v || v.length === 0) {
+        //             this.setState({ firstSelectedItem: "Uva" }, () => update(this.state.firstSelectedItem));
+        //         } else {
+        //             this.setState({ firstSelectedItem: this.state.firstSelectedItem }, () => update(this.state.firstSelectedItem));
+        //         }
+        //     },
+        //     onChangeSecondItem: (v: any) => {
+        //         if (!v || v.length === 0) {
+        //             this.setState({ secondSelectedItem: "Uva" }, () => updateSecond(this.state.secondSelectedItem));
+        //         } else {
+        //             this.setState({ secondSelectedItem: this.state.secondSelectedItem }, () => updateSecond(this.state.secondSelectedItem));
+        //         }
+        //     }
+        // });
 
     }
 

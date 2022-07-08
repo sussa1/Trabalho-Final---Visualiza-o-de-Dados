@@ -92,6 +92,15 @@ class Aba4 extends React.Component<IProps, IState> {
                         placeholder="Escolha o produto"
                         onChange={this.onChangeSelectElement}
                     /> </div>
+                </div>
+                <div className="graficos">
+                    <div style={{ width: "100vw", height: "70vh" }}>
+                        <h3 className="titulo-grafico">{this.getSelectedVariableText()} por Estado</h3>
+                        <BumpChart id="3" width={window.innerWidth * 0.98} height={window.innerHeight * 0.67} variable={this.state.selectedVariable}></BumpChart>
+                    </div>
+                <div/>
+
+                <div className='inputs' style={{width: '100%'}}>
                     <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Ano: <RangeSlider
                         className='years'
                         min={this.getMinYear()}
@@ -100,11 +109,7 @@ class Aba4 extends React.Component<IProps, IState> {
                         onChange={changeEvent => this.setState({ selectedYear: parseFloat(changeEvent.target.value) })}
                     /></div>
                 </div>
-                <div className="graficos">
-                    <div style={{ width: "100vw", height: "70vh" }}>
-                        <h3 className="titulo-grafico">Área Perdida por Estado</h3>
-                        <BumpChart id="3" width={window.innerWidth * 0.98} height={window.innerHeight * 0.67} variable={this.state.selectedVariable}></BumpChart>
-                    </div>
+                <div className='graficos'>
                     <div style={{ width: "48vw", height: "80vh" }}>
                         <h3 className="titulo-grafico">{this.getSelectedVariableText()} em {this.state.selectedYear} por Estado</h3>
                         <BarrasHorizontais id="1" width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} city={false} variable={this.state.selectedVariable} year={this.state.selectedYear}></BarrasHorizontais>
@@ -113,6 +118,8 @@ class Aba4 extends React.Component<IProps, IState> {
                         <h3 className="titulo-grafico">{this.getSelectedVariableText()} em {this.state.selectedYear} por Município</h3>
                         <BarrasHorizontais id="2" width={window.innerWidth * 0.48} height={window.innerHeight * 0.77} city={true} variable={this.state.selectedVariable} year={this.state.selectedYear}></BarrasHorizontais>
                     </div>
+                </div>
+
                 </div>
             </div>
         )
