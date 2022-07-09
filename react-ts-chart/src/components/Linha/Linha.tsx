@@ -79,7 +79,7 @@ class Linha extends React.Component<IProps, IState> {
         d3.select(this.ref)
             .html("");
         // set the dimensions and margins of the graph
-        const margin = { top: 10, right: 100, bottom: 30, left: 80 };
+        const margin = { top: 10, right: 250, bottom: 30, left: 80 };
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 
@@ -111,9 +111,7 @@ class Linha extends React.Component<IProps, IState> {
         let yAxis = svg.append("g");
 
         // A color scale: one color for each group
-        const myColor = d3.scaleOrdinal()
-            .domain(products)
-            .range(d3.schemeSet2);
+        const myColor = d3.scaleOrdinal(d3.schemeCategory10);
 
         // Initialize lines
         var line = svg
@@ -163,10 +161,10 @@ class Linha extends React.Component<IProps, IState> {
             .attr("text-anchor", "left")
             .attr("alignment-baseline", "middle")
 
-        let circulo1 = svg.append("circle").attr("cx", width + 20).attr("cy", 0).attr("r", 6).style("opacity", "0")
-        let circulo2 = svg.append("circle").attr("cx", width + 20).attr("cy", 30).attr("r", 6).style("opacity", "0")
-        let txt1 = svg.append("text").attr("x", width + 40).attr("y", 0).style("font-size", "15px").attr("alignment-baseline", "middle")
-        let txt2 = svg.append("text").attr("x", width + 40).attr("y", 30).style("font-size", "15px").attr("alignment-baseline", "middle")
+        let circulo1 = svg.append("circle").attr("cx", 40).attr("cy", 20).attr("r", 6).style("opacity", "0")
+        let circulo2 = svg.append("circle").attr("cx", 40).attr("cy", 50).attr("r", 6).style("opacity", "0")
+        let txt1 = svg.append("text").attr("x", 60).attr("y", 20).style("font-size", "15px").attr("alignment-baseline", "middle")
+        let txt2 = svg.append("text").attr("x", 60).attr("y", 50).style("font-size", "15px").attr("alignment-baseline", "middle")
 
 
         const update = () => {
@@ -200,6 +198,10 @@ class Linha extends React.Component<IProps, IState> {
             y.domain([0, maior]);
             yAxis.transition().duration(500).call(d3.axisLeft(y));
 
+            let color1 = myColor(String(Math.random() % 5));
+            let color2 = myColor(String(5 + Math.random() % 5));
+            console.log(color1);
+
             line
                 .datum(filteredData)
                 .transition()
@@ -208,7 +210,7 @@ class Linha extends React.Component<IProps, IState> {
                     .x(function (d) { return x(+d[0]); })
                     .y(function (d) { return y(+d[1]); })
                 )
-                .attr("stroke", (d: any) => { return String(myColor(this.state.firstSelectedItem)) })
+                .attr("stroke", (d: any) => { return color1 })
 
             hoverData = filteredData.slice();
 
@@ -220,12 +222,12 @@ class Linha extends React.Component<IProps, IState> {
                     .x(function (d) { return x(+d[0]); })
                     .y(function (d) { return y(+d[1]); })
                 )
-                .attr("stroke", (d: any) => { return String(myColor(this.state.secondSelectedItem)) })
+                .attr("stroke", (d: any) => { return color2 })
 
-            hoverDataSecond = filteredData.slice();
+            hoverDataSecond = secondFilteredData.slice();
 
-            circulo1.style("fill", String(myColor(this.state.firstSelectedItem))).style("opacity", "1");
-            circulo2.style("fill", String(myColor(this.state.secondSelectedItem))).style("opacity", "1");
+            circulo1.style("fill", color1).style("opacity", "1");
+            circulo2.style("fill", color2).style("opacity", "1");
             txt1.text(this.props.products ? this.state.firstSelectedItem : this.mapaCodigoEstado[this.state.firstSelectedItem]);
             txt2.text(this.props.products ? this.state.secondSelectedItem : this.mapaCodigoEstado[this.state.secondSelectedItem]);
         }
@@ -285,26 +287,54 @@ class Linha extends React.Component<IProps, IState> {
             // recover coordinate we need
             var x0 = Math.round(x.invert(e[0]));
 
-            var i = bisect(hoverData, x0, 1);
+            var i = bisect(hoverData, x0, 0);
             var selectedData = hoverData[i];
 
-            var i2 = bisect(hoverDataSecond, x0, 1);
+            var i2 = bisect(hoverDataSecond, x0, 0);
             var selectedDataSecond = hoverDataSecond[i2];
+            console.log(i2, hoverDataSecond);
 
-            if (selectedData) focus
+            let ignoreFirst = false;
+            let ignoreSecond = false;
+
+            if (selectedData[0] < selectedDataSecond[0]) {
+                ignoreSecond = true;
+            }
+
+            if (selectedDataSecond[0] < selectedData[0]) {
+                ignoreFirst = true;
+            }
+
+            if (ignoreFirst) {
+                focus.style("opacity", 0)
+                focusText.style("opacity", 0)
+            } else {
+                focus.style("opacity", 1)
+                focusText.style("opacity", 1)
+            }
+
+            if (ignoreSecond) {
+                focusSecond.style("opacity", 0)
+                focusTextSecond.style("opacity", 0)
+            } else {
+                focusSecond.style("opacity", 1)
+                focusTextSecond.style("opacity", 1)
+            }
+
+            if (selectedData && !ignoreFirst) focus
                 .attr("cx", x(selectedData[0]))
                 .attr("cy", y(selectedData[1]))
-            if (selectedData) focusText
-                .html("Ano:" + selectedData[0] + ", Quantidade:" + selectedData[1])
+            if (selectedData && !ignoreFirst) focusText
+                .html("Ano:" + selectedData[0] + ", Valor:" + Math.round(selectedData[1] * 10000) / 10000)
                 .attr("x", x(selectedData[0]) + 5)
                 .attr("y", y(selectedData[1]))
 
 
-            if (selectedDataSecond) focusSecond
+            if (selectedDataSecond && !ignoreSecond) focusSecond
                 .attr("cx", x(selectedDataSecond[0]))
                 .attr("cy", y(selectedDataSecond[1]))
-            if (selectedDataSecond) focusTextSecond
-                .html("Ano:" + selectedDataSecond[0] + ", Quantidade:" + selectedDataSecond[1])
+            if (selectedDataSecond && !ignoreSecond) focusTextSecond
+                .html("Ano:" + selectedDataSecond[0] + ", Valor:" + Math.round(selectedDataSecond[1] * 10000) / 10000)
                 .attr("x", x(selectedDataSecond[0]) + 5)
                 .attr("y", y(selectedDataSecond[1]))
         }
@@ -403,35 +433,41 @@ class Linha extends React.Component<IProps, IState> {
     render() {
         return (
             <div>
-                <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Variável: <Select
-                    name="variables"
-                    options={this.state == null ? [] : this.getVariableSelectElements()}
-                    defaultValue={this.getVariableSelectElements()[0]}
-                    className="variables"
-                    classNamePrefix="select"
-                    placeholder="Escolha o produto"
-                    onChange={this.onChangeVariableSelectElement}
-                /> </div>
-                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "30%" }}> {this.props.products ? "Produto 1:" : "Estado 1"} <Select
-                    name="products1"
-                    options={this.state == null ? [] : this.getSelectElements()}
-                    defaultValue={this.getSelectElements()[0]}
-                    className="basic-select-1"
-                    classNamePrefix="select"
-                    placeholder="Escolha o produto"
-                    onChange={this.onChangeSelectFirstElement}
-                /> </div>
-                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "30%" }}> {this.props.products ? "Produto 2:" : "Estado 2"} <Select
-                    name="products2"
-                    options={this.state == null ? [] : this.getSelectElements()}
-                    defaultValue={this.getSelectElements()[1]}
-                    className="basic-select-2"
-                    classNamePrefix="select"
-                    placeholder="Escolha o produto"
-                    onChange={this.onChangeSelectSecondElement}
-                /> </div>
+                <div style={{ marginLeft: '15px', marginRight: '15px' }}>
+                    <div>
+                        <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Variável: <Select
+                            name="variables"
+                            options={this.state == null ? [] : this.getVariableSelectElements()}
+                            defaultValue={this.getVariableSelectElements()[0]}
+                            className="variables"
+                            classNamePrefix="select"
+                            placeholder="Escolha o produto"
+                            onChange={this.onChangeVariableSelectElement}
+                        /> </div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
+                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "50%" }}> {this.props.products ? "Produto 1" : "Estado 1"}: <Select
+                            name="products1"
+                            options={this.state == null ? [] : this.getSelectElements()}
+                            defaultValue={this.getSelectElements()[0]}
+                            className="variables"
+                            classNamePrefix="select"
+                            placeholder="Escolha o produto"
+                            onChange={this.onChangeSelectFirstElement}
+                        /> </div>
+                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "50%" }}> {this.props.products ? "Produto 2" : "Estado 2"}: <Select
+                            name="products2"
+                            options={this.state == null ? [] : this.getSelectElements()}
+                            defaultValue={this.getSelectElements()[1]}
+                            className="variables"
+                            classNamePrefix="select"
+                            placeholder="Escolha o produto"
+                            onChange={this.onChangeSelectSecondElement}
+                        /> </div>
+                    </div>
+                </div>
                 <div className="svg" >
-                    <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                    <svg className="container-linha" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                 </div>
                 <div className="tooltip-container">
                     <div className="tooltip"></div>

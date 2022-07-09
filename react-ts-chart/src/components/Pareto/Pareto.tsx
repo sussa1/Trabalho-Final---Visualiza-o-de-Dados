@@ -101,9 +101,9 @@ class Pareto extends React.Component<IProps, IState> {
         // Highlight the state that is hovered
         const highlight = (event: any, d: any) => {
             let selected_product = d.Produto
-        
+
             // first every group turns grey
-            d3.selectAll(".bar"+ this.props.id)
+            d3.selectAll(".bar" + this.props.id)
                 .transition().duration(200)
                 .style("fill", "lightgrey")
                 .style("opacity", "0.5")
@@ -111,16 +111,16 @@ class Pareto extends React.Component<IProps, IState> {
             // Second the hovered state takes its color
             d3.selectAll(".state-" + selected_product.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, ''))
                 .transition().duration(200)
-                .style("fill", function(d:any): any{ return( (color(d.Produto)))} )
+                .style("fill", function (d: any): any { return ((color(d.Produto))) })
                 .style("opacity", "1")
 
-            d3.selectAll(".line"+ this.props.id)
+            d3.selectAll(".line" + this.props.id)
                 .transition().duration(200)
                 .style("fill", "none")
                 .style("stroke", "lightgray")
                 .style("opacity", "0.05")
-            
-            d3.selectAll(".circle"+ this.props.id)
+
+            d3.selectAll(".circle" + this.props.id)
                 .transition().duration(200)
                 .style("stroke", "lightgray")
                 .style("opacity", "0.05")
@@ -132,23 +132,23 @@ class Pareto extends React.Component<IProps, IState> {
                 .style("top", (event.pageY - 30) + "px")
                 .style("transform", "scale(1,1)");
             d3.select(".tooltip-pareto")
-                .html("Valor absoluto: " + d.Valor + "<br>Valor relativo: " + d.Valor/total * 100 + "%");
+                .html("Valor absoluto: " + Math.round(d.Valor * 10000) / 10000 + "<br>Valor relativo: " + Math.round(d.Valor / total * 100 * 10000) / 10000 + "%");
         }
 
         const doNotHighlight = (event: any, d: any) => {
             let selected_product = d.Produto
 
-            d3.selectAll(".bar"+ this.props.id)
+            d3.selectAll(".bar" + this.props.id)
                 .transition().duration(200).delay(100)
-                .style("fill", (d: any) => color(d.Produto) )
+                .style("fill", (d: any) => color(d.Produto))
                 .style("opacity", "1")
 
-            d3.selectAll(".line"+ this.props.id)
+            d3.selectAll(".line" + this.props.id)
                 .transition().duration(200).delay(100)
-                .style("stroke", "orange" )
+                .style("stroke", "orange")
                 .style("opacity", "1")
 
-            d3.selectAll(".circle"+ this.props.id)
+            d3.selectAll(".circle" + this.props.id)
                 .transition().duration(200).delay(100)
                 .style("stroke", "orange")
                 .style("opacity", "1")
@@ -164,31 +164,31 @@ class Pareto extends React.Component<IProps, IState> {
         const highlightCircle = (event: any, d: any) => {
             let selected_product = d[0]
 
-            d3.selectAll(".bar"+ this.props.id)
+            d3.selectAll(".bar" + this.props.id)
                 .transition().duration(200)
                 .style("fill", "lightgrey")
                 .style("opacity", "0.5")
 
-            d3.selectAll(".line"+ this.props.id)
+            d3.selectAll(".line" + this.props.id)
                 .transition().duration(200)
                 .style("fill", "none")
                 .style("stroke", "lightgray")
                 .style("opacity", "0.05")
-            
-            d3.selectAll(".circle"+ this.props.id)
+
+            d3.selectAll(".circle" + this.props.id)
                 .transition().duration(200)
                 .style("stroke", "lightgray")
                 .style("opacity", "0.05")
 
-            d3.selectAll(".state-" + selected_product )
+            d3.selectAll(".state-" + selected_product)
                 .transition().duration(200)
-                .style("fill", "orange" )
+                .style("fill", "orange")
                 .style("opacity", "1")
 
-            for (let i=0; i<d[0]; i++) {
-                d3.selectAll(".state-" + proccessedData[i].Produto.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') )
+            for (let i = 0; i < d[0]; i++) {
+                d3.selectAll(".state-" + proccessedData[i].Produto.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, ''))
                     .transition().duration(200)
-                    .style("fill", (d: any) => color(proccessedData[i].Produto) )
+                    .style("fill", (d: any) => color(proccessedData[i].Produto))
                     .style("opacity", "1")
             }
 
@@ -200,27 +200,27 @@ class Pareto extends React.Component<IProps, IState> {
                 .style("transform", "scale(1,1)");
 
             let acumulado = 0;
-            for (let i=0; i<d[0]; i++) {
-                acumulado += (proccessedData[i].Valor/total * 100)
+            for (let i = 0; i < d[0]; i++) {
+                acumulado += (proccessedData[i].Valor / total * 100)
             }
-            
+
             d3.select(".tooltip-pareto")
-                .html("Acumulado: " + acumulado + "%");
+                .html("Acumulado: " + Math.round(acumulado * 10000) / 10000 + "%");
         }
 
         const doNotHighlightCircle = (event: any, d: any) => {
             let selected_product = d.Produto
-            d3.selectAll(".bar"+ this.props.id)
+            d3.selectAll(".bar" + this.props.id)
                 .transition().duration(200).delay(100)
-                .style("fill", (d: any) => color(d.Produto) )
+                .style("fill", (d: any) => color(d.Produto))
                 .style("opacity", "1")
 
-            d3.selectAll(".line"+ this.props.id)
+            d3.selectAll(".line" + this.props.id)
                 .transition().duration(200).delay(100)
-                .style("stroke", "orange" )
+                .style("stroke", "orange")
                 .style("opacity", "1")
 
-            d3.selectAll(".circle"+ this.props.id)
+            d3.selectAll(".circle" + this.props.id)
                 .transition().duration(200).delay(100)
                 .style("stroke", "orange")
                 .style("opacity", "1")
@@ -237,14 +237,14 @@ class Pareto extends React.Component<IProps, IState> {
             .data(proccessedData)
             .enter()
             .append("rect")
-            .attr("class", (d: any) => { return "bar" + this.props.id + " state-" + d.Produto.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') } )
+            .attr("class", (d: any) => { return "bar" + this.props.id + " state-" + d.Produto.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll(" ", "").replace(/\W/g, '') })
             .attr("x", (d: any) => x((d.Produto || '').toString())!)
             .attr("y", (d: any) => y(Number(d.Valor) / total))
             .attr("width", x.bandwidth())
             .attr("height", (d: any) => height - y(Number(d.Valor) / total))
             .attr("fill", (d: any) => color(d.Produto))
             .on("mouseover", highlight)
-            .on("mouseleave", doNotHighlight )
+            .on("mouseleave", doNotHighlight)
 
         const filteredData: any[] = [];
 
@@ -256,7 +256,7 @@ class Pareto extends React.Component<IProps, IState> {
 
         svg.append("path")
             .datum(filteredData)
-            .attr("class", "line"+ this.props.id)
+            .attr("class", "line" + this.props.id)
             .attr("fill", "none")
             .attr("stroke", "orange")
             .attr("stroke-width", 2)
@@ -274,7 +274,7 @@ class Pareto extends React.Component<IProps, IState> {
             .append("circle")
             .attr("cx", function (d) { return (xAxis(d[0].toString())! + x.bandwidth() / 2) })
             .attr("cy", function (d) { cumSum += d[1]; return y(cumSum / total) })
-            .attr("class", (d: any) => { return "circle"+ this.props.id + " state-" + d[0] } )
+            .attr("class", (d: any) => { return "circle" + this.props.id + " state-" + d[0] })
             .attr("r", 5)
             .attr("fill", "orange")
             .attr("stroke", "orange")
@@ -333,10 +333,10 @@ class Pareto extends React.Component<IProps, IState> {
                         }
                     });
 
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, estado: this.props.estado  })
+                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, estado: this.props.estado })
                 });
         }
-        
+
         this.buildGraph();
     }
 

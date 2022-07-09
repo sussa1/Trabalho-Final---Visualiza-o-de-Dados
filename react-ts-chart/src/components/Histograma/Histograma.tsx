@@ -127,7 +127,7 @@ class Histograma extends React.Component<IProps, IState> {
             <div className="root">
                 <div className="graph" style={{ height: this.props.height, width: this.props.width }}>
                     <div className="svg" >
-                        <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
+                        <svg className="container-hist" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                     </div>
                 </div>
                 <div className="tooltip-histograma-container">

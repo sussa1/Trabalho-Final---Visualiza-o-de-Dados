@@ -15,13 +15,13 @@ class Aba3 extends React.Component<IProps, IState> {
         return (
             <div>
                 <div className="graficos">
-                    <div style={{ width: "47vw", height: "52vh" }}>
+                    <div style={{ width: "100vw", height: "70vh" }}>
                         <h3 className="titulo-grafico">Comparação de Produtos</h3>
-                        <Linha id="1" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} products={true}></Linha>
+                        <Linha id="1" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} products={true}></Linha>
                     </div>
-                    <div style={{ width: "47vw", height: "52vh" }}>
+                    <div style={{ width: "100vw", height: "70vh" }}>
                         <h3 className="titulo-grafico">Comparação de Estados</h3>
-                        <Linha id="2" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} products={false}></Linha>
+                        <Linha id="2" width={window.innerWidth * 0.98} height={window.innerHeight * 0.47} products={false}></Linha>
                     </div>
                 </div>
 
