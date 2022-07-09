@@ -1,55 +1,85 @@
 import React from 'react';
 import * as d3 from 'd3';
 import './Linha.css'
-import { cp } from 'fs/promises';
+import Select from 'react-select';
 
 interface IProps {
     width: number,
     height: number,
-    variable: string,
-    firstSelectedItem: string,
-    secondSelectedItem: string,
     products: boolean,
     id: string,
 }
 
 interface IState {
-    data: any[],
-    minYear: number,
-    maxYear: number,
-    conjuntoProdutos: string[],
-    produtosSelecionados: string[],
+    firstData: any[],
+    secondData: any[],
     firstSelectedItem: string,
     secondSelectedItem: string,
     onChangeFirstItem: any,
-    onChangeSecondItem: any
+    onChangeSecondItem: any,
+    onChangeVariable: any,
+    variavel: any
 }
 
 class Linha extends React.Component<IProps, IState> {
     ref!: SVGSVGElement;
-
+    produtos = ['Abacate', 'Abacaxi', 'Alfafa fenada', 'Algodão arbóreo', 'Algodão herbáceo', 'Alho', 'Amendoim', 'Arroz', 'Aveia', 'Azeitona', 'Açaí', 'Banana', 'Batata-doce', 'Batata-inglesa', 'Borracha', 'Cacau', 'Café  Arábica', 'Café  Canephora', 'Café  Total', 'Caju', 'Cana para forragem', 'Cana-de-açúcar', 'Caqui', 'Castanha de caju', 'Cebola', 'Centeio', 'Cevada', 'Chá-da-índia', 'Coco-da-baía', 'Dendê', 'Erva-mate', 'Ervilha', 'Fava', 'Feijão', 'Figo', 'Fumo', 'Girassol', 'Goiaba', 'Guaraná', 'Juta', 'Laranja', 'Limão', 'Linho', 'Malva', 'Mamona', 'Mamão', 'Mandioca', 'Manga', 'Maracujá', 'Marmelo', 'Maçã', 'Melancia', 'Melão', 'Milho', 'Noz', 'Palmito', 'Pera', 'Pimenta-do-reino', 'Pêssego', 'Rami', 'Sisal ou agave', 'Soja', 'Sorgo', 'Tangerina', 'Tomate', 'Trigo', 'Triticale', 'Tungue', 'Urucum', 'Uva'];
+    mapaCodigoEstado: any = {
+        '12': 'Acre',
+        '27': 'Alagoas',
+        '16': 'Amapá',
+        '13': 'Amazonas',
+        '29': 'Bahia',
+        '23': 'Ceará',
+        '53': 'Distrito Federal',
+        '32': 'Espírito Santo',
+        '52': 'Goiás',
+        '21': 'Maranhão',
+        '51': 'Mato Grosso',
+        '50': 'Mato Grosso do Sul',
+        '31': 'Minas Gerais',
+        '15': 'Pará',
+        '25': 'Paraíba',
+        '41': 'Paraná',
+        '26': 'Pernambuco',
+        '22': 'Piauí',
+        '24': 'Rio Grande do Norte',
+        '43': 'Rio Grande do Sul',
+        '33': 'Rio de Janeiro',
+        '11': 'Rondônia',
+        '14': 'Roraima',
+        '42': 'Santa Catarina',
+        '35': 'São Paulo',
+        '28': 'Sergipe',
+        '17': 'Tocantins'
+    };
     constructor(props: IProps) {
         super(props);
         this.state = {
-            data: [],
-            minYear: 0,
-            maxYear: Infinity,
-            conjuntoProdutos: [],
-            produtosSelecionados: [],
-            firstSelectedItem: '',
-            secondSelectedItem: '',
+            firstData: [],
+            secondData: [],
+            firstSelectedItem: this.props.products ? 'Abacate' : '11',
+            secondSelectedItem: this.props.products ? 'Abacaxi' : '12',
             onChangeFirstItem: null,
-            onChangeSecondItem: null
+            onChangeSecondItem: null,
+            onChangeVariable: null,
+            variavel: 'value'
         };
         this.buildGraph = this.buildGraph.bind(this);
+        this.onChangeSelectFirstElement = this.onChangeSelectFirstElement.bind(this);
+        this.onChangeSelectSecondElement = this.onChangeSelectSecondElement.bind(this);
+        this.getSelectElements = this.getSelectElements.bind(this);
+        this.getVariableSelectElements = this.getVariableSelectElements.bind(this);
+        this.onChangeVariableSelectElement = this.onChangeVariableSelectElement.bind(this);
     }
+
 
     private buildGraph() {
 
         d3.select(this.ref)
             .html("");
         // set the dimensions and margins of the graph
-        const margin = {top: 10, right: 100, bottom: 30, left: 80};
+        const margin = { top: 10, right: 100, bottom: 30, left: 80 };
         const width: number = this.props.width - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
 
@@ -62,7 +92,7 @@ class Linha extends React.Component<IProps, IState> {
 
 
         // List of groups (here I have one group per column)
-        const products = ['Abacate', 'Abacaxi', 'Alfafa fenada', 'Algodão arbóreo', 'Algodão herbáceo', 'Alho', 'Amendoim', 'Arroz', 'Aveia', 'Azeitona', 'Açaí', 'Banana', 'Batata-doce', 'Batata-inglesa', 'Borracha', 'Cacau', 'Café Arábica', 'Café Canephora', 'Café Total', 'Caju', 'Cana para forragem', 'Cana-de-açúcar', 'Caqui', 'Castanha de caju', 'Cebola', 'Centeio', 'Cevada', 'Chá-da-índia', 'Coco-da-baía', 'Dendê', 'Erva-mate', 'Ervilha', 'Fava', 'Feijão', 'Figo', 'Fumo', 'Girassol', 'Goiaba', 'Guaraná', 'Juta', 'Laranja', 'Limão', 'Linho', 'Malva', 'Mamona', 'Mamão', 'Mandioca', 'Manga', 'Maracujá', 'Marmelo', 'Maçã', 'Melancia', 'Melão', 'Milho', 'Noz', 'Palmito', 'Pera', 'Pimenta-do-reino', 'Pêssego', 'Rami', 'Sisal ou agave', 'Soja', 'Sorgo', 'Tangerina', 'Tomate', 'Trigo', 'Triticale', 'Tungue', 'Urucum', 'Uva'];
+        const products = ['Abacate', 'Abacaxi', 'Alfafa fenada', 'Algodão arbóreo', 'Algodão herbáceo', 'Alho', 'Amendoim', 'Arroz', 'Aveia', 'Azeitona', 'Açaí', 'Banana', 'Batata-doce', 'Batata-inglesa', 'Borracha', 'Cacau', 'Café  Arábica', 'Café  Canephora', 'Café  Total', 'Caju', 'Cana para forragem', 'Cana-de-açúcar', 'Caqui', 'Castanha de caju', 'Cebola', 'Centeio', 'Cevada', 'Chá-da-índia', 'Coco-da-baía', 'Dendê', 'Erva-mate', 'Ervilha', 'Fava', 'Feijão', 'Figo', 'Fumo', 'Girassol', 'Goiaba', 'Guaraná', 'Juta', 'Laranja', 'Limão', 'Linho', 'Malva', 'Mamona', 'Mamão', 'Mandioca', 'Manga', 'Maracujá', 'Marmelo', 'Maçã', 'Melancia', 'Melão', 'Milho', 'Noz', 'Palmito', 'Pera', 'Pimenta-do-reino', 'Pêssego', 'Rami', 'Sisal ou agave', 'Soja', 'Sorgo', 'Tangerina', 'Tomate', 'Trigo', 'Triticale', 'Tungue', 'Urucum', 'Uva'];
 
         var hoverData: any = [];
 
@@ -70,18 +100,15 @@ class Linha extends React.Component<IProps, IState> {
 
         // Add X axis --> it is a date format
         const x = d3.scaleLinear()
-            .domain([this.state.minYear-1, this.state.maxYear+1])
             .range([0, width]);
-        svg.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x));
+        let xAxis = svg.append("g")
+            .attr("transform", `translate(0, ${height})`);
 
         // Add Y axis
         const y = d3.scaleLinear()
             .domain([0, 5000000])
             .range([height, 0]);
-        svg.append("g")
-            .call(d3.axisLeft(y));
+        let yAxis = svg.append("g");
 
         // A color scale: one color for each group
         const myColor = d3.scaleOrdinal()
@@ -102,7 +129,7 @@ class Linha extends React.Component<IProps, IState> {
             .style("fill", "none")
 
         // This allows to find the closest X index of the mouse:
-        var bisect = d3.bisector(function(d: any) { return d[0]; }).left;
+        var bisect = d3.bisector(function (d: any) { return d[0]; }).left;
 
         // Create the circle that travels along the curve of chart
         var focus = svg
@@ -136,80 +163,99 @@ class Linha extends React.Component<IProps, IState> {
             .attr("text-anchor", "left")
             .attr("alignment-baseline", "middle")
 
-        const update = (selectedProduct: any) => {
-            // const filteredData: any = [];
-            // this.state.data.forEach(instance => {
-            //     if (instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === selectedProduct) {
-            //         filteredData.push([instance.year, instance[this.props.variable]]);
-            //     }
-            // });
+        let circulo1 = svg.append("circle").attr("cx", width + 20).attr("cy", 0).attr("r", 6).style("opacity", "0")
+        let circulo2 = svg.append("circle").attr("cx", width + 20).attr("cy", 30).attr("r", 6).style("opacity", "0")
+        let txt1 = svg.append("text").attr("x", width + 40).attr("y", 0).style("font-size", "15px").attr("alignment-baseline", "middle")
+        let txt2 = svg.append("text").attr("x", width + 40).attr("y", 30).style("font-size", "15px").attr("alignment-baseline", "middle")
 
-            let apiUrl = '';
-            let filteredData: any[] = []
-            if (this.props.products) {
-                apiUrl = 'http://localhost:5000/product/' + this.props.variable + '?product=' + selectedProduct;
-            } else {
-                apiUrl = 'http://localhost:5000/stateTotal/' + this.props.variable + '?state=' + selectedProduct;
+
+        const update = () => {
+            if (!this.state.firstData || !this.state.firstData.length) {
+                return;
             }
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                    let minYear = Infinity;
-                    let maxYear = 0;
-                    let conjuntoProdutos = new Set<string>();
-                    data.forEach((d: any) => {
-                        if (d.year > maxYear) {
-                            maxYear = d.year;
-                        }
-                        if (d.year < minYear) {
-                            minYear = d.year;
-                        }
-                        if (d.product !== "Total") {
-                            let nomeCertoProduto = d.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "");
-                            conjuntoProdutos.add(nomeCertoProduto);
-                        }
-                    });
+            let filteredData: any = [];
+            let secondFilteredData: any = [];
+            let maior = 0;
+            let minYear = Infinity;
+            let maxYear = 0;
+            this.state.firstData.forEach(instance => {
+                filteredData.push([instance.year, instance[this.state.variavel]]);
+                maior = Math.max(maior, instance[this.state.variavel]);
+                minYear = Math.min(minYear, instance.year);
+                maxYear = Math.max(maxYear, instance.year);
+            });
 
-                    filteredData = data;
+            this.state.secondData.forEach(instance => {
+                secondFilteredData.push([instance.year, instance[this.state.variavel]]);
+                maior = Math.max(maior, instance[this.state.variavel]);
+                minYear = Math.min(minYear, instance.year);
+                maxYear = Math.max(maxYear, instance.year);
+            });
 
-                    this.setState({ minYear: minYear, maxYear: maxYear, conjuntoProdutos: Array.from(conjuntoProdutos), produtosSelecionados: Array.from(conjuntoProdutos), data: data, firstSelectedItem: this.props.firstSelectedItem, secondSelectedItem: this.props.secondSelectedItem })
-                });
+            console.log(filteredData);
+            console.log(secondFilteredData);
 
-
-            console.log(filteredData)
+            x.domain([minYear - 1, maxYear + 1]);
+            xAxis.transition().duration(500).call(d3.axisBottom(x).tickFormat(d3.format("d")));
+            y.domain([0, maior]);
+            yAxis.transition().duration(500).call(d3.axisLeft(y));
 
             line
                 .datum(filteredData)
                 .transition()
                 .duration(500)
                 .attr("d", d3.line()
-                    .x(function(d) { return x(+d[0]); })
-                    .y(function(d) { return y(+d[1]); })
+                    .x(function (d) { return x(+d[0]); })
+                    .y(function (d) { return y(+d[1]); })
                 )
-                .attr("stroke", function(d){ return String(myColor(selectedProduct)) })
+                .attr("stroke", (d: any) => { return String(myColor(this.state.firstSelectedItem)) })
 
             hoverData = filteredData.slice();
-        }
-
-        const updateSecond = (selectedProduct: any) => {
-            const filteredData: any = [];
-            this.state.data.forEach(instance => {
-                if (instance.product.replace(/ *\([^)]*\)*/g, "").replaceAll("*", "") === selectedProduct) {
-                    filteredData.push([instance.year, instance[this.props.variable]]);
-                }
-            });
 
             secondLine
-                .datum(filteredData)
+                .datum(secondFilteredData)
                 .transition()
                 .duration(500)
                 .attr("d", d3.line()
-                    .x(function(d) { return x(+d[0]); })
-                    .y(function(d) { return y(+d[1]); })
+                    .x(function (d) { return x(+d[0]); })
+                    .y(function (d) { return y(+d[1]); })
                 )
-                .attr("stroke", function(d){ return String(myColor(selectedProduct)) })
+                .attr("stroke", (d: any) => { return String(myColor(this.state.secondSelectedItem)) })
 
             hoverDataSecond = filteredData.slice();
+
+            circulo1.style("fill", String(myColor(this.state.firstSelectedItem))).style("opacity", "1");
+            circulo2.style("fill", String(myColor(this.state.secondSelectedItem))).style("opacity", "1");
+            txt1.text(this.props.products ? this.state.firstSelectedItem : this.mapaCodigoEstado[this.state.firstSelectedItem]);
+            txt2.text(this.props.products ? this.state.secondSelectedItem : this.mapaCodigoEstado[this.state.secondSelectedItem]);
+        }
+
+        const getUpdateData = () => {
+            let apiUrl = '';
+            if (this.props.products) {
+                apiUrl = 'http://localhost:5000/product/' + this.state.variavel + '?product=' + this.state.firstSelectedItem;
+            } else {
+                apiUrl = 'http://localhost:5000/stateTotal/' + this.state.variavel + '?state=' + this.state.firstSelectedItem;
+            }
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    this.setState({ firstData: data }, update);
+                })
+        }
+
+        const getSecondUpdateData = () => {
+            let apiUrl = '';
+            if (this.props.products) {
+                apiUrl = 'http://localhost:5000/product/' + this.state.variavel + '?product=' + this.state.secondSelectedItem;
+            } else {
+                apiUrl = 'http://localhost:5000/stateTotal/' + this.state.variavel + '?state=' + this.state.secondSelectedItem;
+            }
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    this.setState({ secondData: data }, update);
+                })
         }
 
         // Create a rect on top of the svg area: this rectangle recovers mouse position
@@ -220,9 +266,8 @@ class Linha extends React.Component<IProps, IState> {
             .attr('width', width)
             .attr('height', height)
             .on('mouseover', mouseover)
-            .on('mousemove', (e) => {mousemove(d3.pointer(e)) })
+            .on('mousemove', (e) => { mousemove(d3.pointer(e)) })
             .on('mouseout', mouseout);
-
 
         // What happens when the mouse move -> show the annotations at the right positions.
         function mouseover() {
@@ -232,7 +277,7 @@ class Linha extends React.Component<IProps, IState> {
             }
             if (hoverDataSecond.length > 0 && hoverDataSecond[0][0] && hoverDataSecond[0][1]) {
                 focusSecond.style("opacity", 1)
-                focusTextSecond.style("opacity",1)
+                focusTextSecond.style("opacity", 1)
             }
         }
 
@@ -250,57 +295,43 @@ class Linha extends React.Component<IProps, IState> {
                 .attr("cx", x(selectedData[0]))
                 .attr("cy", y(selectedData[1]))
             if (selectedData) focusText
-                .html("Ano:" + selectedData[0] + ",  " + "Quantidade:" + selectedData[1])
-                .attr("x", x(selectedData[0])+5)
+                .html("Ano:" + selectedData[0] + ", Quantidade:" + selectedData[1])
+                .attr("x", x(selectedData[0]) + 5)
                 .attr("y", y(selectedData[1]))
-            
+
 
             if (selectedDataSecond) focusSecond
                 .attr("cx", x(selectedDataSecond[0]))
                 .attr("cy", y(selectedDataSecond[1]))
             if (selectedDataSecond) focusTextSecond
-                .html("Ano:" + selectedDataSecond[0] + ",  " + "Quantidade:" + selectedDataSecond[1])
-                .attr("x", x(selectedDataSecond[0])+5)
+                .html("Ano:" + selectedDataSecond[0] + ", Quantidade:" + selectedDataSecond[1])
+                .attr("x", x(selectedDataSecond[0]) + 5)
                 .attr("y", y(selectedDataSecond[1]))
         }
-        
+
         function mouseout() {
             focus.style("opacity", 0)
-            focusText.style("opacity",0)
+            focusText.style("opacity", 0)
 
             focusSecond.style("opacity", 0)
-            focusTextSecond.style("opacity",0)
+            focusTextSecond.style("opacity", 0)
         }
 
-        // When the button is changed, run the updateChart function
-        d3.select("#selectButton").on("change", function(event,d) {
-            // recover the option that has been chosen
-            const selectedOption = d3.select(this).property("value")
-            // run the updateChart function with this selected option
-            update(selectedOption)
-        })
+        getUpdateData();
+        getSecondUpdateData();
 
-        d3.select("#selectButtonSecond").on("change", function(event,d) {
-            const selectedOption = d3.select(this).property("value")
-            updateSecond(selectedOption)
-        })
-
-        // this.setState({
-        //     onChangeFirstItem: (v: any) => {
-        //         if (!v || v.length === 0) {
-        //             this.setState({ firstSelectedItem: "Uva" }, () => update(this.state.firstSelectedItem));
-        //         } else {
-        //             this.setState({ firstSelectedItem: this.state.firstSelectedItem }, () => update(this.state.firstSelectedItem));
-        //         }
-        //     },
-        //     onChangeSecondItem: (v: any) => {
-        //         if (!v || v.length === 0) {
-        //             this.setState({ secondSelectedItem: "Uva" }, () => updateSecond(this.state.secondSelectedItem));
-        //         } else {
-        //             this.setState({ secondSelectedItem: this.state.secondSelectedItem }, () => updateSecond(this.state.secondSelectedItem));
-        //         }
-        //     }
-        // });
+        this.setState({
+            onChangeFirstItem: (v: any) => {
+                getUpdateData();
+            },
+            onChangeSecondItem: (v: any) => {
+                getSecondUpdateData();
+            },
+            onChangeVariable: (v: any) => {
+                getUpdateData();
+                getSecondUpdateData();
+            }
+        });
 
     }
 
@@ -308,24 +339,97 @@ class Linha extends React.Component<IProps, IState> {
         this.buildGraph();
     }
 
-    componentDidUpdate() {
-        this.buildGraph();
-        if (this.props.firstSelectedItem !== this.state.firstSelectedItem) {
-            this.setState({ firstSelectedItem: this.props.firstSelectedItem });
-            this.state.onChangeFirstItem(this.state.firstSelectedItem);
+    getSelectElements() {
+        if (this.props.products) {
+            return this.produtos.map((d: any) => {
+                return {
+                    value: d,
+                    label: d
+                };
+            });
         }
-        
-        if (this.props.secondSelectedItem !== this.state.secondSelectedItem) {
-            this.setState({ secondSelectedItem: this.props.secondSelectedItem });
-            this.state.onChangeSecondItem(this.state.secondSelectedItem);
+        return Object.keys(this.mapaCodigoEstado).map((d: any) => {
+            return {
+                value: d,
+                label: this.mapaCodigoEstado[d]
+            };
+        });
+    }
+
+    onChangeSelectFirstElement(d: any) {
+        let selectedOption = d.value;
+        if (!selectedOption) {
+            selectedOption = '';
         }
-        
-        console.log(this.state)
+        this.setState({ firstSelectedItem: selectedOption }, this.state.onChangeFirstItem);
+    }
+
+    onChangeSelectSecondElement(d: any) {
+        let selectedOption: string = d.value;
+        if (!selectedOption) {
+            selectedOption = '';
+        }
+        this.setState({ secondSelectedItem: selectedOption }, this.state.onChangeSecondItem);
+    }
+
+    getVariableSelectElements() {
+        return [
+            {
+                value: "value", label: "Valor"
+            },
+            {
+                value: "quantity", label: "Quantidade"
+            },
+            {
+                value: "plantedArea", label: "Área Plantada"
+            },
+            {
+                value: "lostArea", label: "Área Perdida"
+            },
+            {
+                value: "harvestedArea", label: "Área Colhida"
+            },
+        ];
+    }
+
+    onChangeVariableSelectElement(d: any) {
+        let selectedOption = d.value;
+        if (!selectedOption) {
+            selectedOption = 'value';
+        }
+        this.setState({ variavel: selectedOption }, this.state.onChangeVariable);
     }
 
     render() {
         return (
             <div>
+                <div style={{ display: "flex", flexDirection: "row", width: "100%", alignItems: "center" }}> Variável: <Select
+                    name="variables"
+                    options={this.state == null ? [] : this.getVariableSelectElements()}
+                    defaultValue={this.getVariableSelectElements()[0]}
+                    className="variables"
+                    classNamePrefix="select"
+                    placeholder="Escolha o produto"
+                    onChange={this.onChangeVariableSelectElement}
+                /> </div>
+                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "30%" }}> {this.props.products ? "Produto 1:" : "Estado 1"} <Select
+                    name="products1"
+                    options={this.state == null ? [] : this.getSelectElements()}
+                    defaultValue={this.getSelectElements()[0]}
+                    className="basic-select-1"
+                    classNamePrefix="select"
+                    placeholder="Escolha o produto"
+                    onChange={this.onChangeSelectFirstElement}
+                /> </div>
+                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", width: "30%" }}> {this.props.products ? "Produto 2:" : "Estado 2"} <Select
+                    name="products2"
+                    options={this.state == null ? [] : this.getSelectElements()}
+                    defaultValue={this.getSelectElements()[1]}
+                    className="basic-select-2"
+                    classNamePrefix="select"
+                    placeholder="Escolha o produto"
+                    onChange={this.onChangeSelectSecondElement}
+                /> </div>
                 <div className="svg" >
                     <svg className="container" ref={(ref: SVGSVGElement) => this.ref = ref} width='100' height='100'></svg>
                 </div>

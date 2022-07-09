@@ -496,6 +496,7 @@ def getYearCityProductionPlantedAreas(year):
     return results
 
 def getProductProductionValues(product):
+    print(product)
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
@@ -579,7 +580,7 @@ def getStateTotalProductionQuantities(state):
     con.close()
     return results
 
-def getStateTotalProductionLostAreas(state):
+def getStateTotalProductionPlantedAreas(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
@@ -591,7 +592,7 @@ def getStateTotalProductionLostAreas(state):
     con.close()
     return results
 
-def getStateTotalProductionHarvestedAreas(state):
+def getStateTotalProductionLostAreas(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
@@ -603,7 +604,7 @@ def getStateTotalProductionHarvestedAreas(state):
     con.close()
     return results
 
-def getStateTotalProductionPlantedAreas(state):
+def getStateTotalProductionHarvestedAreas(state):
     con = sqlite3.connect('database.db')
     cur = con.cursor()
     results = []
