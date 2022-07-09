@@ -90,10 +90,6 @@ class Linha extends React.Component<IProps, IState> {
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-
-        // List of groups (here I have one group per column)
-        const products = ['Abacate', 'Abacaxi', 'Alfafa fenada', 'Algodão arbóreo', 'Algodão herbáceo', 'Alho', 'Amendoim', 'Arroz', 'Aveia', 'Azeitona', 'Açaí', 'Banana', 'Batata-doce', 'Batata-inglesa', 'Borracha', 'Cacau', 'Café  Arábica', 'Café  Canephora', 'Café  Total', 'Caju', 'Cana para forragem', 'Cana-de-açúcar', 'Caqui', 'Castanha de caju', 'Cebola', 'Centeio', 'Cevada', 'Chá-da-índia', 'Coco-da-baía', 'Dendê', 'Erva-mate', 'Ervilha', 'Fava', 'Feijão', 'Figo', 'Fumo', 'Girassol', 'Goiaba', 'Guaraná', 'Juta', 'Laranja', 'Limão', 'Linho', 'Malva', 'Mamona', 'Mamão', 'Mandioca', 'Manga', 'Maracujá', 'Marmelo', 'Maçã', 'Melancia', 'Melão', 'Milho', 'Noz', 'Palmito', 'Pera', 'Pimenta-do-reino', 'Pêssego', 'Rami', 'Sisal ou agave', 'Soja', 'Sorgo', 'Tangerina', 'Tomate', 'Trigo', 'Triticale', 'Tungue', 'Urucum', 'Uva'];
-
         var hoverData: any = [];
 
         var hoverDataSecond: any = [];
@@ -198,8 +194,8 @@ class Linha extends React.Component<IProps, IState> {
             y.domain([0, maior]);
             yAxis.transition().duration(500).call(d3.axisLeft(y));
 
-            let color1 = myColor(String(Math.random() % 5));
-            let color2 = myColor(String(5 + Math.random() % 5));
+            let color1 = myColor("0");
+            let color2 = myColor("1");
             console.log(color1);
 
             line
