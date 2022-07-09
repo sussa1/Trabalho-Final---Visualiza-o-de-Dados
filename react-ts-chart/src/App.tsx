@@ -17,9 +17,16 @@ interface IState {
 
 class App extends React.Component<IProps, IState> {
 
+  componentDidMount() {
+    document.title = "Produção Agrícola";
+  }
+
   render() {
     return (
       <div className="App">
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <img src="logo512.png" alt="Banner" height={window.innerHeight * 0.25} />
+        </div>
         <Tabs>
           <TabList>
             <Tab>Dados do País</Tab>
@@ -30,19 +37,29 @@ class App extends React.Component<IProps, IState> {
           </TabList>
 
           <TabPanel>
-            <Aba1></Aba1>
+            <div className='aba'>
+              <Aba1></Aba1>
+            </div>
           </TabPanel>
           <TabPanel>
-            <Aba2></Aba2>
+            <div className='aba'>
+              <Aba2></Aba2>
+            </div>
           </TabPanel>
           <TabPanel>
-            <Aba3></Aba3>
+            <div className='aba'>
+              <Aba3></Aba3>
+            </div>
           </TabPanel>
           <TabPanel>
-            <Aba4></Aba4>
+            <div className='aba'>
+              <Aba4></Aba4>
+            </div>
           </TabPanel>
           <TabPanel>
-            <Aba5></Aba5>
+            <div className='aba'>
+              <Aba5></Aba5>
+            </div>
           </TabPanel>
         </Tabs>
       </div>

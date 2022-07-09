@@ -83,7 +83,7 @@ class Aba2 extends React.Component<IProps, IState> {
             return (
                 <div className="App">
                     <div className='mapDiv'>
-                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(name: any, state: any) => this.escolherEstado(name, state)}></Mapa>
+                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.68} estadoCallBack={(name: any, state: any) => this.escolherEstado(name, state)}></Mapa>
                     </div>
                     <div className="selects">
                         <Select
@@ -137,7 +137,7 @@ class Aba2 extends React.Component<IProps, IState> {
             return (
                 <div className="Aba2">
                     <div className='mapDiv'>
-                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.9} estadoCallBack={(name: any, state: any) => this.escolherEstado(name, state)}></Mapa>
+                        <Mapa width={window.innerWidth * 0.9} height={window.innerHeight * 0.68} estadoCallBack={(name: any, state: any) => this.escolherEstado(name, state)}></Mapa>
                     </div>
                 </div>
             );
