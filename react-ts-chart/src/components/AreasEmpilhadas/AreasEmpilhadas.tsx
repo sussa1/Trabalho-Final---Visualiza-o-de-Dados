@@ -64,7 +64,7 @@ class AreasEmpilhadas extends React.Component<IProps, IState> {
         d3.select(this.ref)
             .html("");
         // set the dimensions and margins of the graph
-        const margin = { top: 20, right: 20 + this.props.width * 0.03, bottom: 30, left: 70 };
+        const margin = { top: 20, right: 20 + this.props.width * 0.03, bottom: 30, left: 80 };
         const legendWidth: number = this.props.width * 0.20;
         const width: number = this.props.width - legendWidth - margin.left - margin.right;
         const height: number = this.props.height - margin.top - margin.bottom;
