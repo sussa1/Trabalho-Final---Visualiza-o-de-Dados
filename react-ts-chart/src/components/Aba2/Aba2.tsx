@@ -98,19 +98,19 @@ class Aba2 extends React.Component<IProps, IState> {
                     </div>
                     <div className="graficos">
                         <div style={{ width: "47vw", height: "52vh" }}>
-                            <h3 className="titulo-grafico">Valor (R$) - {this.state.nomeEstado}</h3>
+                            <h3 className="titulo-grafico">Valor (Mil Reais) - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="1" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='value' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado} pais={false}></AreasEmpilhadas>
                         </div>
                         <div style={{ width: "47vw", height: "52vh" }}>
-                            <h3 className="titulo-grafico">Quantidade - {this.state.nomeEstado}</h3>
+                            <h3 className="titulo-grafico">Quantidade (Toneladas) - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="2" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='quantity' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado} pais={false}></AreasEmpilhadas>
                         </div>
                         <div style={{ width: "47vw", height: "52vh" }}>
-                            <h3 className="titulo-grafico">Área Plantada - {this.state.nomeEstado}</h3>
+                            <h3 className="titulo-grafico">Área Plantada (Hectares) - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="3" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='plantedArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado} pais={false}></AreasEmpilhadas>
                         </div>
                         <div style={{ width: "47vw", height: "52vh" }}>
-                            <h3 className="titulo-grafico">Área Perdida - {this.state.nomeEstado}</h3>
+                            <h3 className="titulo-grafico">Área Perdida (Hectares) - {this.state.nomeEstado}</h3>
                             <AreasEmpilhadas id="4" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='lostArea' produtosSelecionados={this.state.produtosSelecionados} estado={this.state.estado} pais={false}></AreasEmpilhadas>
                         </div>
                         <div style={{ width: "100vw", height: "52vh" }}>

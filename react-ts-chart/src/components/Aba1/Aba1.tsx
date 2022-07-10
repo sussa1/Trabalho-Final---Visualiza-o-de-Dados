@@ -67,19 +67,19 @@ class Aba1 extends React.Component<IProps, IState> {
                 </div>
                 <div className="graficos">
                     <div style={{ width: "47vw", height: "52vh" }}>
-                        <h3 className="titulo-grafico">Valor (R$) - País</h3>
+                        <h3 className="titulo-grafico">Valor (Mil Reais) - País</h3>
                         <AreasEmpilhadas id="1" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='value' produtosSelecionados={this.state.produtosSelecionados} estado='' pais={true}></AreasEmpilhadas>
                     </div>
                     <div style={{ width: "47vw", height: "52vh" }}>
-                        <h3 className="titulo-grafico">Quantidade - País</h3>
+                        <h3 className="titulo-grafico">Quantidade (Toneladas) - País</h3>
                         <AreasEmpilhadas id="2" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='quantity' produtosSelecionados={this.state.produtosSelecionados} estado='' pais={true}></AreasEmpilhadas>
                     </div>
                     <div style={{ width: "47vw", height: "52vh" }}>
-                        <h3 className="titulo-grafico">Área Plantada - País</h3>
+                        <h3 className="titulo-grafico">Área Plantada (Hectares) - País</h3>
                         <AreasEmpilhadas id="3" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='plantedArea' produtosSelecionados={this.state.produtosSelecionados} estado='' pais={true}></AreasEmpilhadas>
                     </div>
                     <div style={{ width: "47vw", height: "52vh" }}>
-                        <h3 className="titulo-grafico">Área Perdida - País</h3>
+                        <h3 className="titulo-grafico">Área Perdida (Hectares) - País</h3>
                         <AreasEmpilhadas id="4" width={window.innerWidth * 0.47} height={window.innerHeight * 0.47} variable='lostArea' produtosSelecionados={this.state.produtosSelecionados} estado='' pais={true}></AreasEmpilhadas>
                     </div>
                 </div>

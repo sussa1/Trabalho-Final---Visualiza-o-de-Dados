@@ -106,7 +106,7 @@ class Aba5 extends React.Component<IProps, IState> {
             <div className="graficos">
                 <Dispersao minYear={2002} maxYear={2019} xlabel="Valor (mil reais)" ylabel="PIB per Capita" id="1" flag={this.state.flagPerCapita} width={window.innerHeight * 0.8} height={window.innerHeight * 0.8} data={this.getPibPerCapitaData()}></Dispersao>
                 <Dispersao minYear={2002} maxYear={2019} xlabel="Valor (mil reais)" ylabel="PIB" id="2" flag={this.state.flagPib} width={window.innerHeight * 0.8} height={window.innerHeight * 0.8} data={this.getGraphPibData()}></Dispersao>
-                <Dispersao minYear={2001} maxYear={2020} xlabel="Quantidade" ylabel="Área Desmatada (km²)" id="3" flag={this.state.flagDesmatamento} width={window.innerHeight * 0.8} height={window.innerHeight * 0.8} data={this.getDesmatamentoData()}></Dispersao>
+                <Dispersao minYear={2001} maxYear={2020} xlabel="Quantidade (toneladas)" ylabel="Área Desmatada (km²)" id="3" flag={this.state.flagDesmatamento} width={window.innerHeight * 0.8} height={window.innerHeight * 0.8} data={this.getDesmatamentoData()}></Dispersao>
             </div>
         )
     }
