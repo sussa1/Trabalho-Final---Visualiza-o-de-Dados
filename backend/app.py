@@ -6,7 +6,7 @@ import os
 
 from repository import production as production_repo
 
-production_repo.fill_db()
+# production_repo.fill_db()
 
 app = Flask(__name__, static_folder="build/static", template_folder="build")
 CORS(app)
